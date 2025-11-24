@@ -1,5 +1,5 @@
 {
-  "name": "codrelAI",
+  "name": "@codrel/monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",

@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "docs",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -11,10 +11,26 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^1.0.4",
+    "@langchain/core": "^1.0.6",
+    "@langchain/google-genai": "^1.0.3",
+    "@neondatabase/serverless": "^1.0.2",
     "@repo/ui": "workspace:*",
+    "@supabase/supabase-js": "^2.84.0",
+    "@upstash/vector": "^1.2.2",
+    "cheerio": "^1.0.0-rc.12",
+    "chromadb": "^3.1.6",
+    "drizzle-orm": "^0.44.2",
+    "ignore": "^5.2.0",
+    "langchain": "^1.0.6",
     "next": "^16.0.1",
+    "next-auth": "^4.24.13",
+    "openai": "^4.62.1",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -22,6 +38,7 @@
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9.39.1",
     "typescript": "5.9.2"
   }

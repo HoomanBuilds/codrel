@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "indexed": 3,
+  "durationMs": 6,
+  "vector_id": "mock_index_12345",
+  "chunkCount": 3
+}

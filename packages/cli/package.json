@@ -1,0 +1,28 @@
+{
+  "name": "@codrel/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "codrel": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@langchain/textsplitters": "^1.0.0",
+    "@mozilla/readability": "^0.6.0",
+    "axios": "^1.6.0",
+    "commander": "^11.1.0",
+    "js-tiktoken": "^1.0.21",
+    "jsdom": "^27.2.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.4.0",
+    "unfluff": "^3.2.0"
+  }
+}
