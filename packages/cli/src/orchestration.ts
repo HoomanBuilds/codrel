@@ -32,8 +32,10 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
   const id = localId ?? `codrel-local-${crypto.randomUUID()}`;
   const ctx = new Context(id, params.token);
   await ctx.init();
+  
   ctx.name = params.name ?? "Untitled Project";
   ctx.remoteProjectId  = params.projectId || null;
+  
   const tasks: Promise<void>[] = [];
   const t0 = Date.now();
 

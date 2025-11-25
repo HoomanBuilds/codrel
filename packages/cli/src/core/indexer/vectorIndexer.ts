@@ -25,7 +25,6 @@ export const vectorIndexer = {
         const metadata = {
           projectLocalId: ctx.projectLocalId,
           projectName: ctx.name,
-
           projectId: ctx.remoteProjectId  || null,
           chunkCount: chunks.length,
           totalTokens,

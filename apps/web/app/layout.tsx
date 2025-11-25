@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistSans.variable}`}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

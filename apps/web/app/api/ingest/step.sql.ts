@@ -4,12 +4,15 @@ import { AppError } from "./AppError";
 import { IngestContext } from "./orchestrator";
 import db from "../../../lib/db/db";
 import { projectsTable, usersTable } from "../../../lib/db/schema";
+import { logEvent } from "../../../lib/analytics/logs";
 
 export async function stepSQL(ctx: IngestContext) {
   try {
     if (!ctx.projectId) {
       ctx.projectId = `codrel-${crypto.randomUUID()}`;
       ctx.isNewProject = true;
+
+      const t0 = performance.now();
 
       await db.insert(projectsTable).values({
         id: ctx.projectId,
@@ -19,6 +22,19 @@ export async function stepSQL(ctx: IngestContext) {
         client: ctx.client,
         totalChunks: ctx.newChunkCount,
         totalTokens: ctx.totalTokens,
+      });
+
+      const t1 = performance.now();
+
+      void logEvent({
+        event: "project_create",
+        userEmail: String(ctx.userEmail),
+        success: true,
+        metadata: {
+          latency_ms: Math.round(t1 - t0),
+          source: "auto-project_create-during-ingest",
+          projectId: ctx.projectId,
+        },
       });
 
       return;
@@ -31,21 +47,43 @@ export async function stepSQL(ctx: IngestContext) {
     if (existing && existing.email !== ctx.userEmail) {
       throw new AppError("Forbidden: You do not own this project", 403);
     }
+
+    // if (!existing) {
+    //   ctx.projectId = `codrel-${crypto.randomUUID()}`;
+    //   ctx.isNewProject = true;
+
+    //   const t0 = performance.now();
+
+    //   await db.insert(projectsTable).values({
+    //     id: ctx.projectId,
+    //     email: String(ctx.userEmail),
+    //     name: ctx.name ?? "Untitled Project",
+    //     description: "",
+    //     client: ctx.client,
+    //     totalChunks: ctx.newChunkCount,
+    //     totalTokens: ctx.totalTokens,
+    //   });
+
+    //   const t1 = performance.now();
+
+    //   void logEvent({
+    //     event: "project_create",
+    //     userEmail: String(ctx.userEmail),
+    //     success: true,
+    //     metadata: {
+    //       latency_ms: Math.round(t1 - t0),
+    //       source: "auto-project_create-during-ingest",
+    //       projectId: ctx.projectId,
+    //     },
+    //   });
+
+    //   return;
+    // }
     if (!existing) {
-      ctx.projectId = `codrel-${crypto.randomUUID()}`;
-      ctx.isNewProject = true;
-
-      await db.insert(projectsTable).values({
-        id: ctx.projectId,
-        email: String(ctx.userEmail),
-        name: ctx.name ?? "Untitled Project",
-        description: "",
-        client: ctx.client,
-        totalChunks: ctx.newChunkCount,
-        totalTokens: ctx.totalTokens,
-      });
-
-      return;
+      throw new AppError(
+        `Project "${ctx.projectId}" not found. Ensure the ID is correct.`,
+        404
+      );
     }
 
     ctx.isNewProject = false;

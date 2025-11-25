@@ -1,6 +1,14 @@
-
-import { boolean, index, integer, jsonb, pgEnum, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
-import { text } from "stream/consumers";
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  serial,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: varchar({ length: 36 }).primaryKey(),
@@ -10,13 +18,15 @@ export const usersTable = pgTable("users", {
   totalProjects: integer().notNull().default(0),
   totalChunks: integer().notNull().default(0),
   createdAt: timestamp().defaultNow().notNull(),
-  updatedAt: timestamp().$onUpdateFn(() => new Date()).notNull(),
+  updatedAt: timestamp()
+    .$onUpdateFn(() => new Date())
+    .notNull(),
 });
 
 export const tokensTable = pgTable(
   "tokens",
   {
-    id: serial("id").primaryKey(), 
+    id: serial("id").primaryKey(),
     email: varchar("email", { length: 255 }).notNull(),
     token: varchar("token", { length: 255 }).notNull().unique(),
     meta: jsonb("meta").notNull().default({}),
@@ -38,8 +48,8 @@ export const projectsTable = pgTable("projects", {
   totalChunks: integer().notNull().default(0),
   totalTokens: integer().notNull().default(0),
   createdAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp().$onUpdate(() => new Date()).defaultNow()
 });
-
 
 export const analyticsTable = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
@@ -49,5 +59,5 @@ export const analyticsTable = pgTable("analytics_events", {
   success: boolean("success").default(true),
   error: varchar("error"),
   metadata: jsonb("metadata").notNull(),
-  ts: timestamp("ts").defaultNow()
+  ts: timestamp("ts").defaultNow(),
 });

@@ -1,5 +1,4 @@
-import crypto from "crypto";
-import { stepAuth, stepIngestQuota, updateUserUsage } from "./step.auth";
+import { stepAuth, stepIngestQuota } from "./step.auth";
 import { stepParse } from "./step.parse";
 import { stepSQL } from "./step.sql";
 import { stepVector } from "./step.vector";
@@ -31,7 +30,7 @@ export interface IngestContext {
   newChunkCount: number;
   sources?: string[];
   isNewProject: boolean;
-  name?: string ;
+  name?: string;
 }
 
 export async function ingest(req: Request) {
@@ -46,7 +45,7 @@ export async function ingest(req: Request) {
     newChunkCount: 0,
     sources: [],
     isNewProject: false,
-    name: "Untitled Project"
+    name: "Untitled Project",
   };
 
   try {
@@ -65,11 +64,6 @@ export async function ingest(req: Request) {
     const quotaLatency = Math.round(performance.now() - quotaStart);
 
     const usageStart = performance.now();
-    await updateUserUsage(
-      String(ctx.userEmail),
-      ctx.isNewProject ? 1 : 0,
-      ctx.newChunkCount
-    );
     const usageLatency = Math.round(performance.now() - usageStart);
 
     const vectorStart = performance.now();
@@ -84,7 +78,7 @@ export async function ingest(req: Request) {
       projectId: ctx.projectId,
       success: true,
       metadata: {
-        total_latency_ms: totalLatency,
+        latency_ms: totalLatency,
         parse_latency_ms: parseLatency,
         quota_latency_ms: quotaLatency,
         usage_latency_ms: usageLatency,
@@ -94,13 +88,12 @@ export async function ingest(req: Request) {
         newChunkCount: ctx.newChunkCount,
         totalTokens: ctx.totalTokens,
         sourceCount: ctx.sources?.length ?? 0,
-        fileExtensions: [...new Set(ctx.chunks.map(c => c.extension))],
-        isNewProject: ctx.isNewProject
+        fileExtensions: [...new Set(ctx.chunks.map((c) => c.extension))],
+        isNewProject: ctx.isNewProject,
       },
     });
 
     return { ok: true, id: ctx.projectId, stored: ctx.chunks.length };
-
   } catch (err) {
     const totalLatency = Math.round(performance.now() - start);
 

@@ -1,6 +1,4 @@
-import { eq, sql } from "drizzle-orm";
 import db from "../../../lib/db/db";
-import { usersTable } from "../../../lib/db/schema";
 import { Askcontext } from "../ask/route";
 import { AppError } from "./AppError";
 import type { IngestContext } from "./orchestrator";
@@ -43,18 +41,4 @@ export async function stepIngestQuota(ctx: IngestContext) {
     throw new AppError(`Chunk limit reached for Account (${MAX_CHUNK_LIMIT})`, 403);
 
   return ctx;
-}
-
-export async function updateUserUsage(
-  email: string,
-  projectInc: number,
-  chunkInc: number,
-) {
-  await db
-    .update(usersTable)
-    .set({
-      totalProjects: sql<number>`${usersTable.totalProjects} + ${projectInc}`,
-      totalChunks: sql<number>`${usersTable.totalChunks} + ${chunkInc}`,
-    })
-    .where(eq(usersTable.email, email));
 }

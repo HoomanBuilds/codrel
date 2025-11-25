@@ -7,7 +7,7 @@ import { tokensTable } from "../../../../lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { logEvent } from "../../../../lib/analytics/logs";
 
-export async function GET() {
+export async function GET(req: Request) {
   const start = performance.now();
   const session = await getServerSession(authOptions);
 
@@ -24,6 +24,10 @@ export async function GET() {
 
   const email = session.user.email!;
   const existing = await db.select().from(tokensTable).where(eq(tokensTable.email, email));
+
+  const searchParams = new URL(req.url).searchParams;
+  const keyName = searchParams.get("keyName");
+
 
   if (existing.length >= 10) {
     void logEvent({
@@ -45,7 +49,7 @@ export async function GET() {
   await db.insert(tokensTable).values({
     email,
     token,
-    meta: { createdFrom: "dashboard", ua: "web" },
+    meta: { createdFrom: "dashboard", ua: "web" , keyName: keyName || "untitled" },
   });
 
   void logEvent({
@@ -53,6 +57,7 @@ export async function GET() {
     userEmail: email,
     success: true,
     metadata: {
+      keyName,
       latency_ms: Math.round(performance.now() - start),
       created_from: "dashboard",
       ua: "web",
@@ -108,7 +113,6 @@ export async function DELETE(req: Request) {
     success: true,
     metadata: {
       latency_ms: Math.round(performance.now() - start),
-      deleted: result,
       token_deleted: true
     }
   });

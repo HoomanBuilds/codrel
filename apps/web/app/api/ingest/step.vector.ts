@@ -25,7 +25,7 @@ function sanitizeMetadata(meta: Record<string, unknown>) {
 }
 
 export async function stepVector(ctx: IngestContext) {
-  const store = createVectorStore(ctx, createEmbeddings(), "chroma");
+  const store = createVectorStore(ctx, createEmbeddings());
   const contents = ctx.chunks.map((c) =>
   `FILE: ${c.relativePath}\nTYPE: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`);
 

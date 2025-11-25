@@ -41,7 +41,7 @@ export async function getRagContext(
   }
 ) {
   const geminiEmbeddings = createEmbeddings();
-  const vectorStore = createVectorStore(ctx, geminiEmbeddings, "chroma");
+  const vectorStore = createVectorStore(ctx,  geminiEmbeddings);
 
   try {
     return vectorStore.similaritySearchWithScore(query, options.topk, options.filter);
