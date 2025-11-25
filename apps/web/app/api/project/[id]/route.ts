@@ -65,7 +65,8 @@ async function deleteChromaForProject(projectId: string) {
   const store = createVectorStore({ projectId }, embeddings);
 
   try {
-    await store.delete({});
+    await store.ensureCollection();  
+    await store.index?.deleteCollection({ name : store.collectionName});
   } catch (err) {
     if ((err as Error).message?.includes("not found") || (err as Error).message?.includes("does not exist")) {
       return;

@@ -25,6 +25,7 @@ export async function GET() {
       "ask",
       "ingest",
       "project_create",
+      "project_delete",
       "token_create",
       "token_delete",
     ].includes(e.event)

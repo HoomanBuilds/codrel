@@ -5,6 +5,7 @@ import { IngestContext } from "./orchestrator";
 import db from "../../../lib/db/db";
 import { projectsTable, usersTable } from "../../../lib/db/schema";
 import { logEvent } from "../../../lib/analytics/logs";
+import { ApiError } from "next/dist/server/api-utils";
 
 export async function stepSQL(ctx: IngestContext) {
   try {
@@ -97,7 +98,7 @@ export async function stepSQL(ctx: IngestContext) {
       .where(eq(projectsTable.id, ctx.projectId));
   } catch (err) {
     console.error("SQL error:", err);
-    throw new AppError("DB insert failed", 500);
+    throw new AppError(`DB insert failed : ${(err as ApiError).message}`, 500);
   }
 }
 

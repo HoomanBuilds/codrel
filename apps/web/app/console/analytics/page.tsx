@@ -21,8 +21,8 @@ import {
 import { formatDate, formatNumber } from "./utils";
 import AnalyticsDashboardSkeleton from "../../../components/SkeletonAnalytics";
 import { useAnalytics } from "../../../store/analytics.store";
-import AnalyticsGraph from "../../../components/AnalyticsGraph";
 import { TimeRange } from "./types";
+import AskLatencyGraph from "../../../components/AnalyticsGraph";
 
 const DataCard = ({ label, value, subValue, icon: Icon }: any) => (
   <Card className="p-5 flex flex-col justify-between h-[120px] bg-[#1c1c1c] border-neutral-800 hover:border-neutral-700 transition-colors group">
@@ -198,17 +198,22 @@ export default function AnalyticsDashboard() {
 
         <DataCard
           label="API Tokens"
-          value={stats?.tokenCreated - stats?.tokenDeleted}
+          value={
+            JSON.parse(localStorage.getItem("codrel_tokens") || "[]").length
+          }
           subValue={`${stats?.tokenCreated} created`}
           icon={Key}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <AnalyticsGraph
+        {/* <AnalyticsGraph
           events={events}
           timeRange={timeRange}
           getTimeLabel={getTimeLabel}
+        /> */}
+        <AskLatencyGraph
+          events={events}
         />
 
         <div className="grid grid-rows-2 gap-4">
@@ -294,10 +299,12 @@ export default function AnalyticsDashboard() {
                           "bg-purple-900/20 text-purple-400",
                         evt.event === "project_create" &&
                           "bg-green-900/20 text-green-400",
-                        (evt.event === "token_create" &&
-                          "bg-orange-900/20 text-orange-400") ||
-                          (evt.event === "token_delete" &&
-                            "bg-red-900/20 text-red-400")
+                        evt.event === "project_delete" &&
+                          "bg-red-900/20 text-red-400",
+                        evt.event === "token_create" &&
+                          "bg-orange-900/20 text-orange-400",
+                        evt.event === "token_delete" &&
+                          "bg-red-900/20 text-red-400"
                       )}
                     >
                       {evt.event}
@@ -315,11 +322,11 @@ export default function AnalyticsDashboard() {
                     {evt.event === "ingest" &&
                       `${formatNumber(evt.metadata?.newChunkCount || 0)} chunks`}
                     {evt.event === "project_create" &&
-                      `Name: ${evt.metadata?.name || ""}`}
+                      `${evt.metadata?.name ? `Name: ${evt.metadata.name}` : ""}`}
                     {evt.event === "token_create" &&
-                      `${evt.metadata?.keyName || ""}`}
+                      `TokenName: ${evt.metadata?.keyName || ""}`}
                     {evt.event === "token_delete" &&
-                      `${evt.metadata?.token_deleted || ""}`}
+                      `${evt.metadata?.token_deleted ? "Deleted" : "-"}`}
                   </td>
                   <td className="p-3 text-neutral-400">
                     {evt.metadata?.latency_ms ?? "-"} ms
