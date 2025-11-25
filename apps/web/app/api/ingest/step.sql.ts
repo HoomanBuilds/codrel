@@ -24,6 +24,30 @@ export async function stepSQL(ctx: IngestContext) {
       return;
     }
 
+    const existing = await db.query.projectsTable.findFirst({
+      where: (p, { eq }) => eq(p.id, ctx.projectId!),
+    });
+
+    if (existing && existing.email !== ctx.userEmail) {
+      throw new AppError("Forbidden: You do not own this project", 403);
+    }
+    if (!existing) {
+      ctx.projectId = `codrel-${crypto.randomUUID()}`;
+      ctx.isNewProject = true;
+
+      await db.insert(projectsTable).values({
+        id: ctx.projectId,
+        email: String(ctx.userEmail),
+        name: ctx.name ?? "Untitled Project",
+        description: "",
+        client: ctx.client,
+        totalChunks: ctx.newChunkCount,
+        totalTokens: ctx.totalTokens,
+      });
+
+      return;
+    }
+
     ctx.isNewProject = false;
 
     await db

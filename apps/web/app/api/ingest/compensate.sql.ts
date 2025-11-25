@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
 import db from "../../../lib/db/db";
-import { documentsTable } from "../../../lib/db/schema";
 import { IngestContext } from "./orchestrator";
+import { projectsTable } from "../../../lib/db/schema";
 
 export async function sqlCleanup(ctx: IngestContext) {
-  if (!ctx.id) return;
+  if (!ctx.projectId) return;
 
   try {
-    await db.delete(documentsTable).where(eq(documentsTable.id, ctx.id));
+    await db.delete(projectsTable).where(eq(projectsTable.id, ctx.projectId!));
   } catch { return null }
 }

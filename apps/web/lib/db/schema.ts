@@ -41,7 +41,6 @@ export const projectsTable = pgTable("projects", {
 });
 
 
-
 export const analyticsTable = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
   event: varchar("event").notNull(),

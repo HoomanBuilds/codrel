@@ -16,18 +16,27 @@ export const vectorIndexer = {
           ok: true,
           indexed: chunks.length,
           durationMs: 50,
-          vector_id: "mock_index_12345",
+          remoteProjectId : "mock_index_12345",
         };
       } else {
         const totalTokens = chunks.reduce((n : number , c : { tokenLength: number }) => n + (c.tokenLength || 0), 0);
         const sources : string[] = [...new Set(chunks.map((c : { source: string }) => c.source).filter(Boolean) as string[])];
 
+        const metadata = {
+          projectLocalId: ctx.projectLocalId,
+          projectName: ctx.name,
+
+          projectId: ctx.remoteProjectId  || null,
+          chunkCount: chunks.length,
+          totalTokens,
+          sources,
+          createdAt: Date.now(),
+        };
         ctx.tokenLength = totalTokens;
         res = await apiClient.request("/ingest", {
           token: ctx.token!,
           chunks,
-          totalTokens,
-          sources
+          metadata
         });
       }
 
@@ -39,7 +48,7 @@ export const vectorIndexer = {
         chunkCount: chunks.length,
         indexing_duration: d,
         indexSummary: res,
-        vector_id: res.id || null,
+        remoteProjectId : res.id || null,
       };
     } catch (err: any) {
       logger.error("\n[ERROR] Vector indexing failed:" , err.message || err);

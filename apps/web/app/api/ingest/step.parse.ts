@@ -16,12 +16,11 @@ export async function stepParse(req: Request, ctx: IngestContext) {
   if (!client) throw new AppError("Invalid client", 400);
   ctx.client = client;
 
-  ctx.projectId = body.projectId ?? null;
+  ctx.projectId = body.metadata?.projectId ?? null;
+  ctx.name = body.metadata?.projectName ?? "Untitled";
 
-  ctx.name = body.name ?? null;
-
-  ctx.totalTokens = body.totalTokens ?? 0;
-  ctx.sources = body.sources ?? [];
+  ctx.totalTokens = body.metadata?.totalTokens ?? 0;
+  ctx.sources = body.metadata?.sources ?? [];
 
   ctx.chunks = stepValidate(body);
   ctx.newChunkCount = ctx.chunks.length;
@@ -34,10 +33,7 @@ export function stepValidate(body: { chunks: CodrelChunk[] }): CodrelChunk[] {
   if (!Array.isArray(body.chunks))
     throw new AppError("Invalid content format", 400);
 
-  const totalChars = body.chunks.reduce(
-    (n, c) => n + (c.text?.length ?? 0),
-    0
-  );
+  const totalChars = body.chunks.reduce((n, c) => n + (c.text?.length ?? 0), 0);
 
   if (totalChars > MAX_TOTAL_CHARS)
     throw new AppError("Content too large to process", 400);

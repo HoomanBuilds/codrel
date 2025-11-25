@@ -6,7 +6,7 @@ const ROOT = path.join(os.homedir(), ".codrel");
 
 export interface ContextState {
   projectLocalId: string;
-  vector_id: string | null;
+  remoteProjectId : string | null;
   commitHash: string | null;
   pipelineVersion: number;
   meta: Record<string, unknown>;
@@ -16,6 +16,7 @@ export interface ContextState {
   indexSummary?: unknown;
   tokenLength?: number;
   logs?: string[];
+  name ?: string;
 }
 
 export class Context {
@@ -23,13 +24,13 @@ export class Context {
   readonly baseDir: string;
   readonly token: string | null = null;
 
-  vector_id: string | null = null;
+  remoteProjectId : string | null = null;
   commitHash: string | null = null;
   indexSummary: unknown = null;
   meta: Record<string, unknown> = {};
   warnings: string[] = [];
 
-  name : string = "Untitled Project";
+  name: string = "Untitled Project";
   repoTrees: Record<string, unknown> = {};
   folderTrees: Record<string, unknown> = {};
   urlTrees: Record<string, unknown> = {};
@@ -79,7 +80,7 @@ export class Context {
   async saveState(): Promise<void> {
     const state: ContextState = {
       projectLocalId: this.projectLocalId,
-      vector_id: this.vector_id,
+      remoteProjectId : this.remoteProjectId ,
       commitHash: this.commitHash,
       pipelineVersion: this.pipelineVersion,
       meta: this.meta,
@@ -92,7 +93,7 @@ export class Context {
   toJSON() {
     return {
       projectLocalId: this.projectLocalId,
-      vector_id: this.vector_id,
+      remoteProjectId : this.remoteProjectId ,
       commitHash: this.commitHash,
       indexSummary: this.indexSummary,
       meta: this.meta,
@@ -119,11 +120,22 @@ export class Context {
       map = {};
     }
 
-    if (this.vector_id) {
-      map[this.vector_id] = this.projectLocalId;
+    if (this.remoteProjectId ) {
+      map[this.remoteProjectId ] = this.projectLocalId;
     }
 
     await fs.writeFile(mappingPath, JSON.stringify(map, null, 2));
+  }
+
+  static async getLocalId(serverId: string): Promise<string | null> {
+    const mappingPath = path.join(ROOT, "projects", "mapping.json");
+
+    try {
+      const map = JSON.parse(await fs.readFile(mappingPath, "utf8"));
+      return map[serverId] ?? null;
+    } catch {
+      return null;
+    }
   }
 }
 
