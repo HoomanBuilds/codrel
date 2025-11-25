@@ -12,15 +12,19 @@ export async function stepParse(req: Request, ctx: IngestContext) {
   }
 
   const clientHeader = req.headers.get("codrelai_client") as IngestContext["client"];
-  const client = (clientHeader === "cli" || clientHeader === "web") ? clientHeader : null;
-
+  const client = clientHeader === "cli" || clientHeader === "web" ? clientHeader : null;
   if (!client) throw new AppError("Invalid client", 400);
-
-  ctx.totalTokens = body.totalTokens || 0;
-  ctx.sources = body.sources || [];
-  ctx.chunks = stepValidate(body);
-
   ctx.client = client;
+
+  ctx.projectId = body.projectId ?? null;
+
+  ctx.name = body.name ?? null;
+
+  ctx.totalTokens = body.totalTokens ?? 0;
+  ctx.sources = body.sources ?? [];
+
+  ctx.chunks = stepValidate(body);
+  ctx.newChunkCount = ctx.chunks.length;
 }
 
 export function stepValidate(body: { chunks: CodrelChunk[] }): CodrelChunk[] {

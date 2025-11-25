@@ -15,6 +15,9 @@ export interface ProcessParams {
   files?: string[];
   folder?: string[];
   token: string;
+  chunkSize?: number;
+  name?: string;
+  projectId?: string;
 }
 
 export async function orchestrate(params: ProcessParams): Promise<void> {
@@ -23,10 +26,11 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
     return;
   }
 
-  const id = `codrel-${crypto.randomUUID()}`;
+  const id = params.projectId ?? `codrel-local-${crypto.randomUUID()}`;
   const ctx = new Context(id , params.token);
   await ctx.init();
-
+  
+  ctx.name = params.name ?? "Untitled Project";
   const tasks: Promise<void>[] = [];
 
   const t0 = Date.now();
@@ -86,6 +90,7 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
   await ctx.write("index-summary.json", ctx.indexSummary);
   await ctx.write("meta.json", ctx.meta);
   await ctx.write("chunks.json", chunks);
+  await ctx.write("logs.txt", ctx.logs.join("\n"));
 
   await ctx.saveState();
   await ctx.addToGlobalMapping();
@@ -95,5 +100,4 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
   logger.info("chunks:", result.chunkCount);
   logger.info("duration:", `${d}ms`);
   logger.info("vector id:", result.vector_id);
-
 }

@@ -1,3 +1,5 @@
+import Context from "../core/context";
+
 type LogValue = string | number | boolean | object | null | undefined;
 type LogArgs = LogValue[];
 
@@ -7,7 +9,7 @@ const COLORS = {
   red: "\x1b[31m",
   green: "\x1b[32m",
   yellow: "\x1b[33m",
-  cyan: "\x1b[36m"
+  cyan: "\x1b[36m",
 } as const;
 
 function ts(): string {
@@ -16,12 +18,20 @@ function ts(): string {
 
 export class Logger {
   private scope: string;
-
-  constructor(scope: string) {
+  private ctx?: Context;
+  constructor(scope: string, ctx?: Context) {
     this.scope = scope;
+    this.ctx = ctx;
+  }
+
+  private store(label: string, args: LogArgs) {
+    if (!this.ctx) return;
+    const line = `${new Date().toISOString()} ${label} [${this.scope}] ${args.join(" ")}`;
+    this.ctx.addLog(line);
   }
 
   private fmt(label: string, color: string, args: LogArgs) {
+    this.store(label, args);
     const tag = `${color}${label}${COLORS.reset}`;
     return [ts(), tag, `[${this.scope}]`, ...args];
   }

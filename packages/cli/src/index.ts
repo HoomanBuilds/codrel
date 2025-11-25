@@ -8,6 +8,9 @@ type CreateArgs = {
   files?: string;
   dir?: string;
   token?: string;
+  chunkSize?: string;
+  name?: string;
+  projectId?: string;
 };
 
 program
@@ -16,11 +19,14 @@ program
   .version("0.1.0");
 
 program
-  .command("create")
+  .command("ingest")
   .option("--repo <url>", "git repo (comma-separated for multiple)")
   .option("--url <urls>", "remote URLs (comma-separated)")
   .option("--files <pattern>", "glob pattern for files (comma-separated)")
   .option("--dir <path>", "local folder path (comma-separated)")
+  .option("--chunkSize <number>", "chunk size")
+  .option("--name <name>", "project name")
+  .option("--projectId <name>", "project projectId")
   .requiredOption("--token <t>", "auth token")
   .action(async (opts: CreateArgs) => {
     if (!opts.repo && !opts.url && !opts.files && !opts.dir) {
@@ -33,7 +39,10 @@ program
       url: opts.url ? opts.url.split(",").map(s => s.trim()) : undefined,
       files: opts.files ? opts.files.split(",").map(s => s.trim()) : undefined,
       folder: opts.dir ? opts.dir.split(",").map(s => s.trim()) : undefined,
-      token: opts.token!
+      token: opts.token!,
+      chunkSize : opts.chunkSize ? parseInt(opts.chunkSize) : undefined,
+      name : opts.name ? opts.name : undefined,
+      projectId : opts.projectId ? opts.projectId : undefined,
     };
 
     await orchestrate(params);

@@ -9,7 +9,7 @@ export async function processFolder(
   ctx: Context,
   params: ProcessParams
 ): Promise<void> {
-  const log = new Logger(`folder:${folder}`);
+  const log = new Logger(`folder:${folder}` , ctx);
 
   log.info("building tree");
   const raw = await buildTreeFromFolder(folder);

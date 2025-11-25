@@ -17,7 +17,7 @@ export async function processUrl(
   ctx: Context,
   params: ProcessParams
 ): Promise<void> {
-  const log = new Logger(`url:${url}`);
+  const log = new Logger(`url:${url}` , ctx);
 
   log.info("fetching");
   const controller = new AbortController();

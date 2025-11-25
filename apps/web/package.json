@@ -19,6 +19,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "@repo/ui": "workspace:*",
     "@supabase/supabase-js": "^2.84.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "@upstash/vector": "^1.2.2",
     "cheerio": "^1.0.0-rc.12",
     "chromadb": "^3.1.6",
@@ -38,8 +39,11 @@
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "autoprefixer": "^10.4.22",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.39.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
     "typescript": "5.9.2"
   }
 }

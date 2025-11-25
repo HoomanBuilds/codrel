@@ -1,21 +1,54 @@
-import db from "../../../lib/db/db";
-import { documentsTable } from "../../../lib/db/schema";
+import crypto from "crypto";
+import { eq, sql } from "drizzle-orm";
 import { AppError } from "./AppError";
 import { IngestContext } from "./orchestrator";
+import db from "../../../lib/db/db";
+import { projectsTable, usersTable } from "../../../lib/db/schema";
 
 export async function stepSQL(ctx: IngestContext) {
   try {
-    await db.insert(documentsTable).values({
-      id: ctx.projectId,
-      userId: ctx.userId,
-      client: ctx.client,
-      sources: ctx.sources || [],
-      filePath: "",
-      chunkSize: ctx.totalTokens,
-    });
+    if (!ctx.projectId) {
+      ctx.projectId = `codrel-${crypto.randomUUID()}`;
+      ctx.isNewProject = true;
 
+      await db.insert(projectsTable).values({
+        id: ctx.projectId,
+        email: String(ctx.userEmail),
+        name: ctx.name ?? "Untitled Project",
+        description: "",
+        client: ctx.client,
+        totalChunks: ctx.newChunkCount,
+        totalTokens: ctx.totalTokens,
+      });
+
+      return;
+    }
+
+    ctx.isNewProject = false;
+
+    await db
+      .update(projectsTable)
+      .set({
+        totalChunks: sql`${projectsTable.totalChunks} + ${ctx.newChunkCount}`,
+        totalTokens: sql`${projectsTable.totalTokens} + ${ctx.totalTokens}`,
+      })
+      .where(eq(projectsTable.id, ctx.projectId));
   } catch (err) {
     console.error("SQL error:", err);
     throw new AppError("DB insert failed", 500);
   }
+}
+
+export async function updateUserUsage(
+  email: string,
+  projectInc: number,
+  chunkInc: number
+) {
+  await db
+    .update(usersTable)
+    .set({
+      totalProjects: sql`${usersTable.totalProjects} + ${projectInc}`,
+      totalChunks: sql`${usersTable.totalChunks} + ${chunkInc}`,
+    })
+    .where(eq(usersTable.email, email));
 }

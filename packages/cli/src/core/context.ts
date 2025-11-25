@@ -15,12 +15,13 @@ export interface ContextState {
 
   indexSummary?: unknown;
   tokenLength?: number;
+  logs?: string[];
 }
 
 export class Context {
   readonly projectLocalId: string;
   readonly baseDir: string;
-  token: string | null = null;
+  readonly token: string | null = null;
 
   vector_id: string | null = null;
   commitHash: string | null = null;
@@ -28,6 +29,7 @@ export class Context {
   meta: Record<string, unknown> = {};
   warnings: string[] = [];
 
+  name : string = "Untitled Project";
   repoTrees: Record<string, unknown> = {};
   folderTrees: Record<string, unknown> = {};
   urlTrees: Record<string, unknown> = {};
@@ -35,11 +37,16 @@ export class Context {
 
   allChunks: unknown[] = [];
   pipelineVersion = 1;
+  logs: string[] = [];
 
   constructor(projectLocalId: string, token?: string) {
     this.projectLocalId = projectLocalId;
     this.token = token || null;
     this.baseDir = path.join(ROOT, "projects", projectLocalId);
+  }
+
+  addLog(line: string) {
+    this.logs.push(line);
   }
 
   async init(): Promise<void> {

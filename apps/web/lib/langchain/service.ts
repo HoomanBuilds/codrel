@@ -4,7 +4,6 @@ import {
   GoogleGenerativeAIEmbeddings,
 } from "@langchain/google-genai";
 import { createVectorStore } from "../db/vectorDB";
-import { IngestContext } from "../../app/api/ingest/orchestrator";
 import { Askcontext } from "../../app/api/ask/route";
 
 export function createllm(
@@ -20,7 +19,6 @@ export function createllm(
         temperature,
         maxOutputTokens,
       });
-    // case "chatgpt" : return new ChatOpenAI({ model, temperature, maxOutputTokens });
     default:
       return new ChatGoogleGenerativeAI({
         model,
@@ -37,21 +35,23 @@ export async function storeToRAG() {}
 export async function getRagContext(
   query: string,
   ctx: Askcontext,
-  options: { topk : number , filter?: Record<string, any> } = { topk: 20 }
+  options: {
+    topk: number;
+    filter?: Record<string, any>;
+  }
 ) {
   const geminiEmbeddings = createEmbeddings();
-  const vectorStore = createVectorStore(ctx , geminiEmbeddings , "chroma");
-  let similaritySearchResults: Array<any> = [];
+  const vectorStore = createVectorStore(ctx, geminiEmbeddings, "chroma");
+
   try {
-    similaritySearchResults = await vectorStore.similaritySearch( query , options.topk);
+    return vectorStore.similaritySearchWithScore(query, options.topk, options.filter);
   } catch (error) {
     throw new Error(`Error while fetching data from vector db ${error}`);
   }
-  return similaritySearchResults;
 }
 
 export const createEmbeddings = () => {
   return new GoogleGenerativeAIEmbeddings({
-    model: "text-embedding-004"
+    model: "text-embedding-004",
   });
 };

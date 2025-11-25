@@ -9,7 +9,7 @@ export async function processRepo(
   ctx: Context,
   params: ProcessParams
 ): Promise<void> {
-  const log = new Logger(`repo:${repo}`);
+  const log = new Logger(`repo:${repo}` , ctx);
 
   log.info("building tree");
   const raw = await buildTreeFromRepo(repo);

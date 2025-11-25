@@ -26,11 +26,13 @@ function sanitizeMetadata(meta: Record<string, unknown>) {
 
 export async function stepVector(ctx: IngestContext) {
   const store = createVectorStore(ctx, createEmbeddings(), "chroma");
+  const contents = ctx.chunks.map((c) =>
+  `FILE: ${c.relativePath}\nTYPE: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`);
 
-  const contents = ctx.chunks.map(c => String(c.text));
 
-  const metadataList = ctx.chunks.map(c =>
+  const metadataList = ctx.chunks.map((c) =>
     sanitizeMetadata({
+      id: c.id,
       relativePath: c.relativePath,
       extension: c.extension,
       language: c.language,
@@ -41,18 +43,19 @@ export async function stepVector(ctx: IngestContext) {
       source: c.source,
       sourceType: c.sourceType,
       docId: ctx.projectId,
-      userId: ctx.userId,
+      email: ctx.userEmail,
     })
   );
 
-  const ids = ctx.chunks.map(c => c.id || crypto.randomUUID());
+  const ids = ctx.chunks.map((c) => c.id || crypto.randomUUID());
 
   const vectors = await store.embeddings.embedDocuments(contents);
 
-  const docs = metadataList.map(m => ({
-    pageContent: "",
-    metadata: m
+  const docs = metadataList.map((c) => ({
+    pageContent : "",
+    // pageContent: `FILE: ${c.relativePath}\nEXT: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`,
+    metadata: c,
   }));
-
+  
   await store.addVectors(vectors, docs, { ids });
 }

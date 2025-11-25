@@ -10,7 +10,7 @@ export async function processFiles(
   ctx: Context,
   params: ProcessParams
 ): Promise<void> {
-  const log = new Logger(`file:${filePath}`);
+  const log = new Logger(`file:${filePath}` , ctx);
 
   log.info("reading");
 

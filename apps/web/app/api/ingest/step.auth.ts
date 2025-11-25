@@ -1,4 +1,6 @@
+import { eq, sql } from "drizzle-orm";
 import db from "../../../lib/db/db";
+import { usersTable } from "../../../lib/db/schema";
 import { Askcontext } from "../ask/route";
 import { AppError } from "./AppError";
 import type { IngestContext } from "./orchestrator";
@@ -10,13 +12,49 @@ export async function stepAuth<T extends IngestContext | Askcontext>(
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
   if (!token) throw new AppError("Unauthorized", 401);
 
-  const row = await db.query.tokensTable.findFirst({
+  const raw = await db.query.tokensTable.findFirst({
     where: (tokensTable, { eq }) => eq(tokensTable.token, token),
   });
-  if (!row) throw new AppError("Invalid token", 401);
 
-  ctx.userId = row.userId;
+  if (!raw) throw new AppError("Invalid token", 401);
+  if (!raw.email && !raw.id) throw new AppError("Invalid token", 401);
+
+  ctx.userEmail = raw.email as string;
 
   const c = req.headers.get("codrelai_client");
   ctx.client = c as T["client"];
+
+  return ctx;
+}
+
+export async function stepIngestQuota(ctx: IngestContext) {
+  const user = await db.query.usersTable.findFirst({
+    where: (u, { eq }) => eq(u.email, String(ctx.userEmail)),
+  });
+
+  if (!user) throw new AppError("no user associated with token", 404);
+
+  const MAX_PROJECT_LIMIT = 5
+  if (user.totalProjects >= MAX_PROJECT_LIMIT)
+    throw new AppError(`Project limit reached for Account (${MAX_PROJECT_LIMIT})`, 403);
+  
+  const MAX_CHUNK_LIMIT = 2000
+  if (user.totalChunks + ctx.newChunkCount >= MAX_CHUNK_LIMIT)
+    throw new AppError(`Chunk limit reached for Account (${MAX_CHUNK_LIMIT})`, 403);
+
+  return ctx;
+}
+
+export async function updateUserUsage(
+  email: string,
+  projectInc: number,
+  chunkInc: number,
+) {
+  await db
+    .update(usersTable)
+    .set({
+      totalProjects: sql<number>`${usersTable.totalProjects} + ${projectInc}`,
+      totalChunks: sql<number>`${usersTable.totalChunks} + ${chunkInc}`,
+    })
+    .where(eq(usersTable.email, email));
 }
