@@ -1,135 +1,156 @@
-# Turborepo starter
+# **Codrel AI**
 
-This Turborepo starter is maintained by the Turborepo core team.
+![Codrel Banner](./assets/banner.png)
 
-## Using this example
+Codrel is a full-stack system for generating, structuring, and serving **RAG-ready context** to every tool a developer uses.
+It ingest documents, URLs, repos, and directories through a CLI, produces structured context, and exposes it to IDEs and agents through MCP, APIs, and a web dashboard.
 
-Run the following command:
+A single pipeline:
+**Your data → Codrel ingestion → structured context → usable everywhere.**
 
-```sh
-npx create-turbo@latest
-```
+---
 
-## What's inside?
+## **✨ Overview**
 
-This Turborepo includes the following packages/apps:
+![Codrel Dashboard](./assets/dashboard.png)
 
-### Apps and Packages
+Codrel solves the core problem:
+AI assistants don’t know your project — Codrel gives them context.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+* ingest anything → CLI
+* create `.codrel` knowledge state
+* explore/manage → Web (Next.js)
+* serve structured context → API
+* plug into editors → MCP server
+* access instantly → VS Code/Kiro extension
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Codrel makes every coding environment context-aware.
 
-### Utilities
+---
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## **📂 Repository Structure**
 
 ```
-cd my-turborepo
+apps/
+  codrel-ide-extension/   → VS Code + Kiro extension
+  codrel-mcp/             → MCP Server (stdio)
+  web/                    → Next.js dashboard + API routes
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+packages/
+  cli/                    → Codrel CLI (RAG ingestion engine)
+  shared/                 → Shared logic + types
+  ui/                     → Shared UI components
+  eslint-config/          → Shared lint config
+  typescript-config/      → Shared tsconfig
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
+
+## **🧠 What Codrel Does**
+
+Codrel takes scattered knowledge from your project and turns it into structured context usable by AI agents.
+
+### The CLI ingests:
+
+* documents
+* URLs
+* repositories
+* directories
+* files
+* entire API sources
+
+### Example CLI pattern
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+npx codrel ingest \
+  --token=<token> \
+  --documentToIngest <path|url> \
+  --support \
+  --repo <github-url> \
+  --dir <folder> \
+  --files <file1,file2,...>
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
+This writes the `.codrel` knowledge state:
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+.cordel/
+  chunks.json
+  meta.json
+  state.json
+  wholecontext.json
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+This becomes the **source of truth** for all other components.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+---
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+## **🖥 Architecture**
 
-### Remote Caching
+![Codrel Architecture](./assets/flow.png)
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## **🧩 Component Breakdown**
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+### **1. Codrel CLI (packages/cli)**
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+The heart of Codrel.
+Builds the entire RAG context using ingestion pipelines, orchestration logic, and the internal `.codrel` engine.
 
-```
-cd my-turborepo
+### **2. Codrel Web (apps/web)**
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+Next.js dashboard + backend:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+* visualize context
+* manage collections & auth
+* serve ingestion results to MCP
+* dashboard for end-users
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+![Dashboard GIF Placeholder](./assets/dashboard.gif)
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### **3. Codrel MCP Server (apps/codrel-mcp)**
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+Standard MCP implementation over stdio.
+Acts as the interpreter layer between editors and the Codrel Web API.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+### **4. Codrel IDE Extension (apps/codrel-ide-extension)**
 
-## Useful Links
+Brings Codrel into VS Code and Kiro IDE:
 
-Learn more about the power of Turborepo:
+* handles MCP server lifecycle
+* stores Codrel token
+* writes workspace context
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+  * Kiro → `.kiro/steering/codrel-tools.md`
+  * VS Code → `.github/copilot-instructions.md`
+* exposes commands for adding collections/tools
+
+<!-- ![IDE Extension](./assets/extension.png) -->
+
+### **5. Shared Packages**
+
+* `shared/` → common logic/types/state
+* `ui/` → dashboard UI components
+* `eslint-config/` + `typescript-config/` → monorepo dev standards
+
+---
+
+## **🔗 How It All Works Together**
+
+Codrel allows every part of your workflow to access the same structured context:
+
+| Layer         | Purpose                                      |
+| ------------- | -------------------------------------------- |
+| **CLI**       | Ingest data → build `.codrel`                |
+| **Web**       | View/manage context + expose backend API     |
+| **MCP**       | Translate editor requests → Codrel responses |
+| **Extension** | Provide workspace tools + MCP integration    |
+
+---
+
+## **🎯 In One Line**
+
+Codrel turns your real project knowledge into structured, always-available context —
+and feeds it into any AI-powered development workflow.
+
+---
