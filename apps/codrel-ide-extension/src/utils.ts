@@ -49,59 +49,46 @@ function getMcpJsonPath(): string {
 
 function registerMcp(serverPath: string) {
   const mcpPath = getMcpJsonPath();
-  const app = vscode.env.appName.toLowerCase();
-  const isKiro = app.includes("kiro");
+  const isKiro = vscode.env.appName.toLowerCase().includes("kiro");
 
-  let data: any = isKiro ? { mcpServers: {} } : { servers: {}, inputs: [] };
-
+  let data: any;
   if (fs.existsSync(mcpPath)) {
     try {
       data = JSON.parse(fs.readFileSync(mcpPath, "utf8"));
     } catch {
-      log("Invalid mcp.json, recreating.");
+      data = isKiro ? { mcpServers: {} } : { servers: {}, inputs: [] };
     }
-  }
-
-  if (isKiro) {
-    if (!data.mcpServers) data.mcpServers = {};
-
-    // skip overwrite
-    if (data.mcpServers["codrelAi"]) {
-      log("MCP already exists. Skipped.");
-      return;
-    }
-
-    data.mcpServers["codrelAi"] = {
-      command: "node",
-      args: [serverPath],
-      env: {},
-      disabled: false,
-      autoApprove: ["*"],
-      disabledTools: [],
-    };
   } else {
-    if (!data.servers) data.servers = {};
-    if (!data.inputs) data.inputs = [];
-
-    // skip overwrite
-    if (data.servers["codrelAi"]) {
-      log("MCP already exists. Skipped.");
-      return;
-    }
-
-    data.servers["codrelAi"] = {
-      type: "stdio",
-      command: "node",
-      args: [serverPath],
-    };
+    data = isKiro ? { mcpServers: {} } : { servers: {}, inputs: [] };
   }
 
-  fs.mkdirSync(path.dirname(mcpPath), { recursive: true });
+  const container = isKiro ? data.mcpServers : data.servers;
+  const key = "codrelAi";
+
+  // Create if missing
+  if (!container[key]) {
+    container[key] = isKiro
+      ? {
+          command: "node",
+          args: [serverPath],
+          env: {},
+          disabled: false,
+          autoApprove: ["*"],
+          disabledTools: [],
+        }
+      : {
+          type: "stdio",
+          command: "node",
+          args: [serverPath],
+          env: {},
+        };
+  }
+
+  // Always ensure env exists
+  if (!container[key].env) container[key].env = {};
+
   fs.writeFileSync(mcpPath, JSON.stringify(data, null, 2));
-
-  log(`MCP registered: ${mcpPath} | mode=${isKiro ? "kiro" : "vscode-family"}`);
 }
-
 
 async function autoInstallAgent(context: vscode.ExtensionContext) {
   const storageDir = context.globalStorageUri.fsPath;
@@ -119,7 +106,7 @@ async function autoInstallAgent(context: vscode.ExtensionContext) {
 
   const fileUrl =
     "https://raw.githubusercontent.com/vinitngr/codrel-mcp-reg/refs/heads/main/mcp-stdio.js";
-    
+
   log("Downloading Codrel Agent...");
 
   fs.mkdirSync(agentDir, { recursive: true });
