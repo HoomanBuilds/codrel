@@ -106,7 +106,7 @@ Next.js dashboard + backend:
 * serve ingestion results to MCP
 * dashboard for end-users
 
-![Dashboard GIF Placeholder](./assets/dashboard.gif)
+![Dashboard GIF Placeholder](./assets/dashboard2.gif)
 
 ### **3. Codrel MCP Server (apps/codrel-mcp)**
 

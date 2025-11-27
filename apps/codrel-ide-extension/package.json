@@ -1,8 +1,9 @@
 {
   "name": "codrel-ide-extension",
-  "displayName": "Codrel AI Devtools",
-  "publisher": "codrel",
-  "version": "0.0.1",
+  "displayName": "Codrel IDE",
+  "icon": "./logo.png",
+  "publisher": "codrel-dev",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.106.0"
   },

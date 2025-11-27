@@ -106,7 +106,7 @@ async function autoInstallAgent(context: vscode.ExtensionContext) {
     return distFile;
   }
 
-  const fileUrl = "https://raw.githubusercontent.com/vinitngr/codrel-mcp-reg/main/mcp-stdio.cjs";
+  const fileUrl = "https://raw.githubusercontent.com/hoomandigital/codrel/main/apps/codrel-ide-extension/codrel.extension.js";
   log("Downloading Codrel Agent...");
   
   fs.mkdirSync(agentDir, { recursive: true });
