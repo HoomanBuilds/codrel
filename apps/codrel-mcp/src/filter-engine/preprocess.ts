@@ -1,13 +1,10 @@
 import type { FullChunk, RetrievedChunk, ScoringWeights } from "../types.js";
 import { DEFAULT_WEIGHTS } from "../utils/constants.js";
-import {
-  type ScoredChunk,
-  scoreAll,
-} from "./scoring-core.js";
+import { type ScoredChunk, scoreAll } from "./scoring-core.js";
 
 export interface PreprocessOptions {
   retrievedChunks: RetrievedChunk[];
-  fullChunks: Map<string, FullChunk>;
+  fullChunks?: Map<string, FullChunk>;
   query: string;
   topK?: number | null;
   tokenMax?: number | null;
@@ -54,7 +51,7 @@ export function ProcessRetrieved(options: PreprocessOptions) {
   if (tokenMax != null) scored = filterByToken(scored, tokenMax);
 
   return scored.map((s) => {
-    const full = fullChunks.get(s.id);
+    const full = fullChunks?.get(s.id);
     return full ? { ...full, ...s } : s;
   });
 }

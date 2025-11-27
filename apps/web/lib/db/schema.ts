@@ -48,7 +48,8 @@ export const projectsTable = pgTable("projects", {
   totalChunks: integer().notNull().default(0),
   totalTokens: integer().notNull().default(0),
   createdAt: timestamp().defaultNow().notNull(),
-  updatedAt: timestamp().$onUpdate(() => new Date()).defaultNow()
+  updatedAt: timestamp().$onUpdate(() => new Date()).defaultNow(),
+  type: varchar({ length: 50 }).notNull(),
 });
 
 export const analyticsTable = pgTable("analytics_events", {

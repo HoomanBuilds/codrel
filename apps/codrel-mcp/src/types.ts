@@ -3,6 +3,7 @@ export interface RagRequest {
   query: string;
   k: number;
   projectId: string;
+  cloud?: boolean;
 }
 
 export interface RagMetadata {

@@ -30,6 +30,7 @@ export const vectorIndexer = {
           totalTokens,
           sources,
           createdAt: Date.now(),
+          cloud : !ctx.local,
         };
         ctx.tokenLength = totalTokens;
         res = await apiClient.request("/ingest", {

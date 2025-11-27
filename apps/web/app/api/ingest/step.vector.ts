@@ -1,6 +1,7 @@
 import { createVectorStore } from "../../../lib/db/vectorDB";
 import { createEmbeddings } from "../../../lib/langchain/service";
 import type { IngestContext } from "./orchestrator";
+import crypto from "crypto";
 
 function sanitizeMetadata(meta: Record<string, unknown>) {
   const out: Record<string, string | number | boolean | null> = {};
@@ -26,9 +27,11 @@ function sanitizeMetadata(meta: Record<string, unknown>) {
 
 export async function stepVector(ctx: IngestContext) {
   const store = createVectorStore(ctx, createEmbeddings());
-  const contents = ctx.chunks.map((c) =>
-  `FILE: ${c.relativePath}\nTYPE: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`);
+  const mode = ctx.mode ?? "cloud";
 
+  const contents = ctx.chunks.map((c) =>
+    `FILE: ${c.relativePath}\nTYPE: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`
+  );
 
   const metadataList = ctx.chunks.map((c) =>
     sanitizeMetadata({
@@ -44,6 +47,7 @@ export async function stepVector(ctx: IngestContext) {
       sourceType: c.sourceType,
       docId: ctx.projectId,
       email: ctx.userEmail,
+      mode,
     })
   );
 
@@ -51,11 +55,10 @@ export async function stepVector(ctx: IngestContext) {
 
   const vectors = await store.embeddings.embedDocuments(contents);
 
-  const docs = metadataList.map((c) => ({
-    pageContent : "",
-    // pageContent: `FILE: ${c.relativePath}\nEXT: ${c.extension}\nLINES: ${c.startLine}-${c.endLine}\n---\n${c.text}`,
-    metadata: c,
+  const docs = metadataList.map((meta, i) => ({
+    pageContent: mode === "cloud" ? contents[i] ?? "" : "",
+    metadata: meta,
   }));
-  
+
   await store.addVectors(vectors, docs, { ids });
 }

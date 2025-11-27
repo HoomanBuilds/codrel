@@ -17,6 +17,7 @@ export interface ContextState {
   tokenLength?: number;
   logs?: string[];
   name ?: string;
+  local?: boolean;
 }
 
 export class Context {
@@ -39,6 +40,8 @@ export class Context {
   allChunks: unknown[] = [];
   pipelineVersion = 1;
   logs: string[] = [];
+
+  local = false;
 
   constructor(projectLocalId: string, token?: string) {
     this.projectLocalId = projectLocalId;

@@ -4,11 +4,13 @@ import { getRagContext } from "../../../lib/langchain/service";
 import { stepAuth } from "../ingest/step.auth";
 import { ApiError } from "next/dist/server/api-utils";
 import { logEvent } from "../../../lib/analytics/logs";
+import { db } from "../../../lib/db/db";
 export interface Askcontext {
   userEmail: string | null;
   projectId: string | null;
   userId?: string | null;
   client?: "agent" | "web" | "cli";
+  cloud?: boolean;
 }
 
 export async function POST(req: Request) {
@@ -16,25 +18,44 @@ export async function POST(req: Request) {
     userEmail: null,
     projectId: null,
     client: "agent",
+    cloud: true,
   };
 
   const start = performance.now();
 
   try {
-    const { query, k = 20, filter, projectId } = await req.json();
+    const { query, k = 20, filter, projectId, cloud } = await req.json();
     ctx.projectId = projectId;
+    ctx.cloud = cloud;
 
-    if (k <= 0 || k > 100) throw new ApiError(400, "k must be between 1 and 100");
+    if (k <= 0 || k > 100)
+      throw new ApiError(400, "k must be between 1 and 100");
     if (!ctx.projectId) throw new ApiError(400, "Missing projectId");
     if (!query) throw new AppError("Missing query", 400);
 
     await stepAuth(req, ctx);
 
+    const project = await db.query.projectsTable.findFirst({
+      where: (p, { eq }) => eq(p.id, ctx.projectId!),
+    });
+
+    if (!project)
+      throw new AppError(`Project '${ctx.projectId}' not found`, 404);
+
+    if (!ctx.cloud)
+      if (project.email !== ctx.userEmail)
+        throw new AppError(
+          "Forbidden: this local project belongs to another user",
+          403
+        );
+
     const raw = await getRagContext(query, ctx, { topk: k, filter });
     const latency = Math.round(performance.now() - start);
 
-    const scores = raw.map(([ , score]) => score);
-    const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+    const scores = raw.map(([, score]) => score);
+    const avg = scores.length
+      ? scores.reduce((a, b) => a + b, 0) / scores.length
+      : null;
     const min = scores.length ? Math.min(...scores) : null;
     const max = scores.length ? Math.max(...scores) : null;
 
@@ -53,6 +74,9 @@ export async function POST(req: Request) {
         vector_min_score: min,
         vector_max_score: max,
         client: ctx.client,
+        owner : project.email,
+        type: project.type,
+        user : ctx.userEmail,
       },
     });
 
@@ -66,7 +90,6 @@ export async function POST(req: Request) {
         pageContent: doc.pageContent,
       })),
     });
-
   } catch (err) {
     const latency = Math.round(performance.now() - start);
 
@@ -79,6 +102,7 @@ export async function POST(req: Request) {
       metadata: {
         latency_ms: latency,
         client: ctx.client,
+        user : ctx.userEmail
       },
     });
 

@@ -22,7 +22,7 @@ export class RagService {
 
   collectionId: string;
   localId: string | null = null;
-
+  cloud: boolean = true;
   chunks: Map<string, FullChunk> = new Map();
 
   constructor(collectionId: string) {
@@ -31,7 +31,8 @@ export class RagService {
 
   async init(): Promise<void> {
     this.localId = await this.getLocalId(this.collectionId);
-    await this.loadFullChunksFromJson();
+    this.cloud = !this.localId;
+    if (!this.cloud) await this.loadFullChunksFromJson();
   }
 
   private async getLocalId(serverId: string): Promise<string | null> {
@@ -75,6 +76,7 @@ export class RagService {
       query,
       k: 20,
       projectId,
+      cloud: this.cloud,
     };
 
     const res = await fetch(this.endpoint, {
@@ -120,9 +122,12 @@ export class RagService {
         depth: 0,
       };
     });
+
+    const fullChunks = this.cloud ? undefined : this.chunks;
+
     const scored = ProcessRetrieved({
       retrievedChunks,
-      fullChunks: this.chunks,
+      fullChunks,
       query,
       topK: 20,
       tokenMax: null,
@@ -132,13 +137,19 @@ export class RagService {
     return scored;
   }
 
-  createContextPrompt(filteredChunks: FullChunk[]): string {
+  createContextPrompt(filteredChunks: any[]): string {
     const out = [];
 
     for (const c of filteredChunks) {
-      const full =
-        this.chunks instanceof Map ? this.chunks.get(c.id) : this.chunks[c.id];
+      if (this.cloud) {
+        out.push(
+          `// ${c.relativePath} (${c.startLine ?? "?"}-${c.endLine ?? "?"})\n` +
+            (c.pageContent || "")
+        );
+        continue;
+      }
 
+      const full = this.chunks.get(c.id);
       if (!full) continue;
 
       out.push(

@@ -11,12 +11,10 @@ type CreateArgs = {
   chunkSize?: string;
   name?: string;
   projectId?: string;
+  local?: boolean;
 };
 
-program
-  .name("rag")
-  .description("RAG CLI")
-  .version("0.1.0");
+program.name("rag").description("RAG CLI").version("0.1.0");
 
 program
   .command("ingest")
@@ -30,19 +28,24 @@ program
   .requiredOption("--token <t>", "auth token")
   .action(async (opts: CreateArgs) => {
     if (!opts.repo && !opts.url && !opts.files && !opts.dir) {
-      console.error("error: at least one of --repo, --url, --files, --dir required");
+      console.error(
+        "error: at least one of --repo, --url, --files, --dir required"
+      );
       process.exit(1);
     }
 
     const params: ProcessParams = {
-      repo: opts.repo ? opts.repo.split(",").map(s => s.trim()) : undefined,
-      url: opts.url ? opts.url.split(",").map(s => s.trim()) : undefined,
-      files: opts.files ? opts.files.split(",").map(s => s.trim()) : undefined,
-      folder: opts.dir ? opts.dir.split(",").map(s => s.trim()) : undefined,
+      repo: opts.repo ? opts.repo.split(",").map((s) => s.trim()) : undefined,
+      url: opts.url ? opts.url.split(",").map((s) => s.trim()) : undefined,
+      files: opts.files
+        ? opts.files.split(",").map((s) => s.trim())
+        : undefined,
+      folder: opts.dir ? opts.dir.split(",").map((s) => s.trim()) : undefined,
       token: opts.token!,
-      chunkSize : opts.chunkSize ? parseInt(opts.chunkSize) : undefined,
-      name : opts.name ? opts.name : undefined,
-      projectId : opts.projectId ? opts.projectId : undefined,
+      chunkSize: opts.chunkSize ? parseInt(opts.chunkSize) : undefined,
+      name: opts.name ? opts.name : undefined,
+      projectId: opts.projectId ? opts.projectId : undefined,
+      local: opts.local === true,
     };
 
     await orchestrate(params);

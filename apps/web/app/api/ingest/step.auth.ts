@@ -14,8 +14,9 @@ export async function stepAuth<T extends IngestContext | Askcontext>(
     where: (tokensTable, { eq }) => eq(tokensTable.token, token),
   });
 
-  if (!raw) throw new AppError("Invalid token", 401);
-  if (!raw.email && !raw.id) throw new AppError("Invalid token", 401);
+  if (!raw || !raw.email) {
+    throw new AppError("Invalid token", 401);
+  }
 
   ctx.userEmail = raw.email as string;
 

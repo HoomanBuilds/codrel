@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    "types": ["node"],                 // <-- FIX
+    "types": ["node"],
     "lib": ["esnext"],
 
     "rootDir": "./src",

@@ -20,6 +20,7 @@ export interface ProcessParams {
   chunkSize?: number;
   name?: string;
   projectId?: string;
+  local?: boolean;
 }
 
 export async function orchestrate(params: ProcessParams): Promise<void> {
@@ -28,14 +29,30 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
     return;
   }
 
-  const localId = await Context.getLocalId(params.projectId || "");
-  const id = localId ?? `codrel-local-${crypto.randomUUID()}`;
+  let id: string;
+  if (params.local) {
+    if (params.projectId) {
+      const localId = await Context.getLocalId(params.projectId);
+      if (!localId) {
+        logger.error(
+          `no local project found for projectId ${params.projectId}`
+        );
+        return;
+      }
+      id = localId;
+    } else {
+      id = `codrel-local-${crypto.randomUUID()}`;
+    }
+  } else {
+    id = `codrel-cloud-${crypto.randomUUID()}`;
+  }
+
   const ctx = new Context(id, params.token);
   await ctx.init();
-  
+  if (params.local) ctx.local = true;
   ctx.name = params.name ?? "Untitled Project";
-  ctx.remoteProjectId  = params.projectId || null;
-  
+  ctx.remoteProjectId = params.projectId || null;
+
   const tasks: Promise<void>[] = [];
   const t0 = Date.now();
 
@@ -54,10 +71,8 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
   const chunks = extractChunksFromTrees(merged);
   ctx.allChunks = chunks;
 
-  await ctx.write("pre-index-chunks.json", chunks);
-
   const result = await vectorIndexer.indexTree(chunks, ctx);
-  ctx.remoteProjectId  = result.remoteProjectId ;
+  ctx.remoteProjectId = result.remoteProjectId;
 
   const duration = Date.now() - t0;
   ctx.indexSummary = {
@@ -70,7 +85,7 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
     indexedAt: Date.now(),
     chunkCount: result.chunkCount,
     durationMs: duration,
-    remoteProjectId : result.remoteProjectId ,
+    remoteProjectId: result.remoteProjectId,
     sources: {
       repos: params.repo || [],
       folders: params.folder || [],
@@ -79,21 +94,20 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
     },
   };
 
-  await ctx.write("index-summary.json", ctx.indexSummary);
-  await ctx.write("meta.json", ctx.meta);
-
-  await writeChunksWithAppendLogic(ctx, chunks, params.projectId);
-
-  await ctx.write("logs.txt", ctx.logs.join("\n"));
-  await ctx.saveState();
-  await ctx.addToGlobalMapping();
+  if (params.local) {
+    await ctx.write("index-summary.json", ctx.indexSummary);
+    await ctx.write("meta.json", ctx.meta);
+    await writeChunksWithAppendLogic(ctx, chunks, params.projectId);
+    await ctx.write("logs.txt", ctx.logs.join("\n"));
+    await ctx.saveState();
+    await ctx.addToGlobalMapping();
+  }
 
   logger.sucess("orchestration completed");
   logger.info("chunks:", result.chunkCount);
   logger.info("duration:", `${duration}ms`);
-  logger.info("vector id:", result.remoteProjectId );
+  logger.info("projectId:", result.remoteProjectId);
 }
-
 
 async function writeChunksWithAppendLogic(
   ctx: Context,
