@@ -9,7 +9,7 @@ import { ApiError } from "next/dist/server/api-utils";
 
 export async function stepSQL(ctx: IngestContext) {
   try {
-    const mode = ctx.mode ?? "cloud";
+    const mode = ctx.cloud ? "cloud" : "local";
 
     if (!ctx.projectId) {
       ctx.projectId = `codrel-${crypto.randomUUID()}`;

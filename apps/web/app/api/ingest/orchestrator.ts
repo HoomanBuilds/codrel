@@ -31,7 +31,7 @@ export interface IngestContext {
   sources?: string[];
   isNewProject: boolean;
   name?: string;
-  mode?: "local" | "cloud";
+  cloud?: boolean;
 }
 
 export async function ingest(req: Request) {
@@ -47,7 +47,7 @@ export async function ingest(req: Request) {
     sources: [],
     isNewProject: false,
     name: "Untitled Project",
-    mode: "cloud",
+    cloud: true,
   };
 
   try {

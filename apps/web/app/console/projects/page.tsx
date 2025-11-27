@@ -27,10 +27,15 @@ export default function VectorIndices() {
   const { stats, allProjects } = data;
 
   const deleteCollection = async (projectId: string) => {
-    const confirmed = window.confirm("Are you sure you want to delete this project?");
+    const confirmed = window.confirm("Are you sure?");
     if (!confirmed) return;
+
     const res = await fetch(`/api/project/${projectId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Delete failed");
+    const { allProjects } = useAnalytics.getState().data;
+    useAnalytics.getState().setData({
+      allProjects: allProjects.filter((p: any) => p.id !== projectId),
+    });
   };
 
   if (loading) {
@@ -38,7 +43,14 @@ export default function VectorIndices() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 py-10">
+    <div
+      style={{
+        overflow: "auto",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+      className="space-y-6 h-screen overflow-y-auto animate-in fade-in duration-500 py-10"
+    >
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight font-mono">
           Projects
@@ -81,7 +93,7 @@ export default function VectorIndices() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {allProjects?.length > 0 ? (
             allProjects?.map((idx: any) => (
               <Card

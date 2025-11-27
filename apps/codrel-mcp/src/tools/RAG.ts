@@ -17,21 +17,21 @@ const ROOT = path.join(os.homedir(), ".codrel");
 
 export class RagService {
   private endpoint = "http://localhost:3000/api/ask";
-  private apiToken = "ae3c12a8fe1e0a196e9b9d0c0bd09da6";
-  private authHeader = "ae3c12a8fe1e0a196e9b9d0c0bd09da6";
+  private apiToken: null | string = null;
 
   collectionId: string;
   localId: string | null = null;
   cloud: boolean = true;
   chunks: Map<string, FullChunk> = new Map();
 
-  constructor(collectionId: string) {
+  constructor(collectionId: string, token: string) {
     this.collectionId = collectionId;
+    this.apiToken = token;
   }
 
   async init(): Promise<void> {
     this.localId = await this.getLocalId(this.collectionId);
-    this.cloud = !this.localId;
+    this.cloud = Boolean(!this.localId);
     if (!this.cloud) await this.loadFullChunksFromJson();
   }
 
@@ -71,6 +71,10 @@ export class RagService {
     projectId: string,
     query: string
   ): Promise<RagResult[]> {
+    if (!this.apiToken)
+      throw new Error(
+        "API token not provided. Please set it using the 'Codrel: Set API Token' command in VS Code or Kiro"
+      );
     const body: RagRequest = {
       token: this.apiToken,
       query,
@@ -83,7 +87,7 @@ export class RagService {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${this.authHeader}`,
+        authorization: `Bearer ${this.apiToken}`,
       },
       body: JSON.stringify(body),
     });
@@ -118,6 +122,7 @@ export class RagService {
         tokenLength: m.tokenLength,
         email: m.email,
         docId: m.docId,
+        pageContent: r.pageContent,
         neighbors: [],
         depth: 0,
       };
@@ -140,7 +145,7 @@ export class RagService {
   createContextPrompt(filteredChunks: any[]): string {
     const out = [];
 
-    for (const c of filteredChunks) {
+    for (const c of filteredChunks.slice(0, 5)) {
       if (this.cloud) {
         out.push(
           `// ${c.relativePath} (${c.startLine ?? "?"}-${c.endLine ?? "?"})\n` +

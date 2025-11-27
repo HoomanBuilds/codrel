@@ -2,16 +2,23 @@ import path from "path";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 export async function processNode(n: any): Promise<void> {
-  const s = new RecursiveCharacterTextSplitter({ chunkSize: 2000, chunkOverlap: 300 });
+  const s = new RecursiveCharacterTextSplitter({
+    chunkSize: 1500,
+    chunkOverlap: 200,
+  });
 
   if (n.type === "file") {
     const full = n.rawContent;
     const pieces = await s.splitText(full);
-    let idx = 0;
+
+    const overlap = 200;
+    let cursor = 0;
 
     n.chunks = pieces.map((txt, i) => {
-      const start = full.indexOf(txt, idx);
-      idx = start + txt.length;
+      const start = cursor;
+      const end = start + txt.length;
+
+      cursor = end - overlap; 
 
       const startLine = full.slice(0, start).split("\n").length;
       const endLine = startLine + txt.split("\n").length - 1;
@@ -20,7 +27,7 @@ export async function processNode(n: any): Promise<void> {
       const rel = n.path.split(path.sep);
 
       return {
-        id: `${n.path.replace(/[/\\]/g, "__")}_c${i}`,
+        id: `${n.path.replace(/[/\\]/g, "__")}_c${i}__${crypto.randomUUID().slice(0, 6)}`,
         chunkIdx: i,
         filePath: n.path,
         relativePath: n.path,
@@ -30,7 +37,7 @@ export async function processNode(n: any): Promise<void> {
         endLine,
         treePath: rel,
         text: txt,
-        tokenLength: Math.ceil(txt.length / 4)
+        tokenLength: Math.ceil(txt.length / 4),
       };
     });
 
@@ -40,6 +47,7 @@ export async function processNode(n: any): Promise<void> {
 
   if (n.children) for (const ch of n.children) await processNode(ch);
 }
+
 
 export async function buildChunkedTree(tree: any) {
   await processNode(tree);
@@ -63,7 +71,7 @@ function guessLang(ext: string) {
     yaml: "yaml",
     html: "html",
     css: "css",
-    md: "markdown"
+    md: "markdown",
   };
   return map[ext] || "text";
 }

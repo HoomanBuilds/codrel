@@ -1,4 +1,3 @@
-
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
@@ -15,15 +14,13 @@ function log(msg: string) {
 }
 
 async function downloadFile(url: string, dest: string) {
-  const res = await fetch(url) as any;   // tell TS “trust me”
+  const res = (await fetch(url)) as any; // tell TS “trust me”
 
   if (!res.ok) throw new Error(`Failed: ${res.status}`);
 
   const buf = Buffer.from(await res.arrayBuffer());
   fs.writeFileSync(dest, buf);
 }
-
-
 
 function getMcpJsonPath(): string {
   const home = os.homedir();
@@ -50,16 +47,12 @@ function getMcpJsonPath(): string {
   return p;
 }
 
-
 function registerMcp(serverPath: string) {
   const mcpPath = getMcpJsonPath();
   const app = vscode.env.appName.toLowerCase();
-
   const isKiro = app.includes("kiro");
 
-  let data: any = isKiro
-    ? { mcpServers: {} }
-    : { servers: {}, inputs: [] };
+  let data: any = isKiro ? { mcpServers: {} } : { servers: {}, inputs: [] };
 
   if (fs.existsSync(mcpPath)) {
     try {
@@ -71,22 +64,35 @@ function registerMcp(serverPath: string) {
 
   if (isKiro) {
     if (!data.mcpServers) data.mcpServers = {};
+
+    // skip overwrite
+    if (data.mcpServers["codrelAi"]) {
+      log("MCP already exists. Skipped.");
+      return;
+    }
+
     data.mcpServers["codrelAi"] = {
       command: "node",
       args: [serverPath],
       env: {},
       disabled: false,
       autoApprove: ["*"],
-      disabledTools: []
+      disabledTools: [],
     };
   } else {
     if (!data.servers) data.servers = {};
     if (!data.inputs) data.inputs = [];
 
+    // skip overwrite
+    if (data.servers["codrelAi"]) {
+      log("MCP already exists. Skipped.");
+      return;
+    }
+
     data.servers["codrelAi"] = {
       type: "stdio",
       command: "node",
-      args: [serverPath]
+      args: [serverPath],
     };
   }
 
@@ -96,19 +102,26 @@ function registerMcp(serverPath: string) {
   log(`MCP registered: ${mcpPath} | mode=${isKiro ? "kiro" : "vscode-family"}`);
 }
 
+
 async function autoInstallAgent(context: vscode.ExtensionContext) {
   const storageDir = context.globalStorageUri.fsPath;
   const agentDir = path.join(storageDir, "codrel-agent");
-  const distFile = path.join(agentDir, "mcp-stdio.cjs");
+  const distFile = path.join(agentDir, "mcp-stdio.js");
 
   if (fs.existsSync(distFile)) {
     log("Agent already installed.");
     return distFile;
   }
 
-  const fileUrl = "https://raw.githubusercontent.com/hoomandigital/codrel/main/apps/codrel-ide-extension/codrel.extension.js";
+  //TODO Later use
+  const officialUrl =
+    "https://github.com/HoomanBuilds/codrel/blob/main/apps/codrel-ide-extension/codrel.extension.js";
+
+  const fileUrl =
+    "https://raw.githubusercontent.com/vinitngr/codrel-mcp-reg/refs/heads/main/mcp-stdio.js";
+    
   log("Downloading Codrel Agent...");
-  
+
   fs.mkdirSync(agentDir, { recursive: true });
   await downloadFile(fileUrl, distFile);
 
@@ -217,6 +230,12 @@ function getWorkspaceRoot(): string | null {
   return ws?.[0]?.uri.fsPath || null;
 }
 
-
-
-export { log, registerMcp, autoInstallAgent , updateTokenInMcpConfig , appendKiroSteering , appendCopilotSteering , getWorkspaceRoot};
+export {
+  log,
+  registerMcp,
+  autoInstallAgent,
+  updateTokenInMcpConfig,
+  appendKiroSteering,
+  appendCopilotSteering,
+  getWorkspaceRoot,
+};

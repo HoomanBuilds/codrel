@@ -21,7 +21,6 @@ import {
 import { formatDate, formatNumber } from "./utils";
 import AnalyticsDashboardSkeleton from "../../../components/SkeletonAnalytics";
 import { useAnalytics } from "../../../store/analytics.store";
-import { TimeRange } from "./types";
 import AskLatencyGraph from "../../../components/AnalyticsGraph";
 
 const DataCard = ({ label, value, subValue, icon: Icon }: any) => (
@@ -99,17 +98,6 @@ export default function AnalyticsDashboard() {
 
   const COLORS = ["#ffd369", "#4caf50", "#ff6b6b", "#29b6f6", "#ba68c8"];
 
-  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.TODAY);
-
-  const getTimeLabel = (timestamp: string) => {
-    const date = new Date(timestamp);
-    if (timeRange === TimeRange.TODAY) {
-      return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
-    } else {
-      return `${date.getMonth() + 1}/${date.getDate()}`;
-    }
-  };
-
   if (loading) {
     return (
       <div>
@@ -138,24 +126,12 @@ export default function AnalyticsDashboard() {
           </p>
         </div>
 
-        <div className="w-full sm:w-48">
-          <SelectNative
-            value={timeRange}
-            onChange={(e) => {
-              const selected = Object.values(TimeRange).find(
-                (v) => v === e.target.value
-              );
-              if (selected) setTimeRange(selected as TimeRange);
-            }}
-            className="font-mono text-xs"
-          >
-            {Object.values(TimeRange).map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </SelectNative>
-        </div>
+        <button
+          onClick={() => fetchOnce(true)}
+          className="px-2 py-1 text-xs font-mono text-neutral-400 bg-neutral-800 rounded hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700"
+        >
+          Refresh
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -212,9 +188,7 @@ export default function AnalyticsDashboard() {
           timeRange={timeRange}
           getTimeLabel={getTimeLabel}
         /> */}
-        <AskLatencyGraph
-          events={events}
-        />
+        <AskLatencyGraph events={events} />
 
         <div className="grid grid-rows-2 gap-4">
           <Card className="p-5 bg-[#1c1c1c] border-neutral-800 flex flex-col justify-center">
@@ -277,7 +251,7 @@ export default function AnalyticsDashboard() {
                 <th className="p-3 pl-4 font-normal">Timestamp</th>
                 <th className="p-3 font-normal">Event</th>
                 <th className="p-3 font-normal">Project</th>
-                <th className="p-3 font-normal">Metadata</th>
+                <th className="p-3 font-normal">OneTag</th>
                 <th className="p-3 font-normal">Latency</th>
                 <th className="p-3 font-normal">Raw Meta</th>
                 <th className="p-3 font-normal">Status</th>

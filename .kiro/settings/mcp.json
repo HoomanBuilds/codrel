@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "codrelAi": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\HP VICTUS\\AppData\\Roaming\\Kiro\\User\\globalStorage\\codrel-dev.codrel-ide-extension\\codrel-agent\\mcp-stdio.js"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ],
+      "disabledTools": []
+    }
+  }
+}

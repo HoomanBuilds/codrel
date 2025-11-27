@@ -12,6 +12,8 @@ type CreateArgs = {
   name?: string;
   projectId?: string;
   local?: boolean;
+  sitemap?: string;
+  pattern?: string;
 };
 
 program.name("rag").description("RAG CLI").version("0.1.0");
@@ -24,10 +26,13 @@ program
   .option("--dir <path>", "local folder path (comma-separated)")
   .option("--chunkSize <number>", "chunk size")
   .option("--name <name>", "project name")
+  .option("--sitemap <yamlFile>", "sitemap yaml file path")
   .option("--projectId <name>", "project projectId")
+  .option("--local", "local or cloud project")
+  .option("--pattern <glob>", "filter URLs, e.g. '/docs/*'")
   .requiredOption("--token <t>", "auth token")
   .action(async (opts: CreateArgs) => {
-    if (!opts.repo && !opts.url && !opts.files && !opts.dir) {
+    if (!opts.repo && !opts.url && !opts.files && !opts.dir && !opts.sitemap) {
       console.error(
         "error: at least one of --repo, --url, --files, --dir required"
       );
@@ -46,6 +51,8 @@ program
       name: opts.name ? opts.name : undefined,
       projectId: opts.projectId ? opts.projectId : undefined,
       local: opts.local === true,
+      sitemap: opts.sitemap ? opts.sitemap : undefined,
+      pattern: opts.pattern ? opts.pattern : undefined,
     };
 
     await orchestrate(params);

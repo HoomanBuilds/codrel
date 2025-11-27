@@ -1,14 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { tools } from "../tools/tools.js";
+import { getCodrelTools } from "../tools/tools";
 
-export function createStdioMcpServer() {
+export function createStdioMcpServer(token : string) {
   const server = new McpServer({
     name: "@codrel-mcp",
     version: "1.0.0",
   });
-  let allTools : Record<string, { tool: any; handler: any }> = {  ...tools };
+  let allTools : Record<string, { tool: any; handler: any }> = {  ...getCodrelTools(token) };
   
+  console.error("🛠️ Registering Codrel MCP tools..." , token);
   console.error("🔍 Tools available before registration:", Object.keys(allTools));
 
   for (const [name, data] of Object.entries(allTools)) {

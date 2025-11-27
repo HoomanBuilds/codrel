@@ -29,24 +29,6 @@ function isBinary(f: string) {
   return BINARY_EXT.has(path.extname(f).toLowerCase());
 }
 
-function chunkText(s: string, size = 2000) {
-  const o = [];
-  for (let i = 0; i < s.length; i += size) o.push(s.slice(i, i + size));
-  return o;
-}
-
-function makeChunkNodes(rel: string, pieces: string[]) {
-  const t = rel.split(path.sep);
-  return pieces.map((txt, i) => ({
-    id: path.basename(rel) + "_c" + i,
-    filePath: rel,
-    chunkIdx: i,
-    treePath: t,
-    tokenLength: Math.ceil(txt.length / 4),
-    text: txt
-  }));
-}
-
 async function cloneRepo(url: string, temp: string) {
   const dst = path.join(temp, "_repo");
   const r = spawnSync("git", ["clone", "--depth", "1", url, dst], { stdio: "ignore" });
@@ -76,12 +58,11 @@ function walk(root: string, rel: string, ig: Set<string>) {
     } else {
       if (isBinary(childAbs)) continue;
       const txt = fs.readFileSync(childAbs, "utf8");
-      const pieces = chunkText(txt);
       node.children.push({
         type: "file",
         path: childRel,
         rawContent: txt,
-        chunks: makeChunkNodes(childRel, pieces)
+        chunks: []
       });
     }
   }

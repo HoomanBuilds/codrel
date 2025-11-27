@@ -31,7 +31,7 @@ export default function AnalyticsGraphXY({ events }: { events: any[] }) {
       ts.setSeconds(0, 0);
       const m = ts.getMinutes();
       const half = m < 30 ? 0 : 30;
-      ts.setMinutes(half, 0, 0); // bucket by half hour
+      ts.setMinutes(half, 0, 0);
 
       const key = ts.getTime();
 
@@ -75,74 +75,154 @@ export default function AnalyticsGraphXY({ events }: { events: any[] }) {
   }, [events]);
 
   return (
-    <Card className="p-6 bg-[#1c1c1c] border-neutral-800 flex flex-col  col-span-2">
-      <h3 className="text-sm font-mono text-neutral-300 uppercase mb-4">
-        Activity Overview
-      </h3>
+    <>
+      <Card className="p-6 bg-[#1c1c1c] border-neutral-800 flex flex-col  col-span-2">
+        <h3 className="text-sm font-mono text-neutral-300 uppercase mb-4">
+          Activity Overview
+        </h3>
 
-      <div style={{ width: "100%", height: 320 }}>
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+        <div style={{ width: "100%", height: 320 }}>
+          <ResponsiveContainer>
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
 
-            <XAxis
-              dataKey="x"
-              type="number"
-              tickFormatter={(v) => formatShortTime(data[0].tsMs + v)}
-              stroke="#404040"
-              fontSize={11}
-            />
+              <XAxis
+                dataKey="x"
+                type="number"
+                tickFormatter={(v) => formatShortTime(data[0].tsMs + v)}
+                stroke="#404040"
+                fontSize={11}
+              />
 
-            {/* LEFT: Activity axis */}
-            <YAxis
-              yAxisId="left"
-              stroke="#404040"
-              fontSize={11}
-              allowDecimals={false}
-            />
+              {/* LEFT: Activity axis */}
+              <YAxis
+                yAxisId="left"
+                stroke="#404040"
+                fontSize={11}
+                allowDecimals={false}
+              />
 
-            {/* RIGHT: Ingest axis */}
-            <YAxis
-              allowDecimals={false}
-              yAxisId="right"
-              orientation="right"
-              stroke="#555"
-              fontSize={11}
-            />
+              {/* RIGHT: Ingest axis */}
+              <YAxis
+                allowDecimals={false}
+                yAxisId="right"
+                orientation="right"
+                stroke="#555"
+                fontSize={11}
+              />
 
-            <Tooltip content={<CustomTooltip base={data[0]?.tsMs || 0} />} />
+              <Tooltip content={<CustomTooltip base={data[0]?.tsMs || 0} />} />
 
-            {/* ACTIVITY — left axis */}
-            <Area
-              yAxisId="left"
-              type="monotone"
-              dataKey={(row) =>
-                row.ask + row.ingest + row.token_create + row.token_delete
-              }
-              name="Activity"
-              stroke="#22c55e"
-              fill="transparent"
-              fillOpacity={0.2}
-              strokeWidth={2}
-              dot
-            />
+              {/* ACTIVITY — left axis */}
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey={(row) =>
+                  row.ask + row.ingest + row.token_create + row.token_delete
+                }
+                name="Activity"
+                stroke="#22c55e"
+                fill="transparent"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot
+              />
 
-            {/* INGEST — right axis (GRAY) */}
-            <Area
-              yAxisId="right"
-              type="step"
-              dataKey="ingest"
-              name="Ingest"
-              stroke="#666"
-              fill="#666"
-              fillOpacity={0.15}
-              strokeWidth={2}
-              dot
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
+              {/* INGEST — right axis (GRAY) */}
+              <Area
+                yAxisId="right"
+                type="step"
+                dataKey="ingest"
+                name="Ingest"
+                stroke="#666"
+                fill="#666"
+                fillOpacity={0.15}
+                strokeWidth={2}
+                dot
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+      {/* --- NEW INGEST-ONLY GRAPH --- */}
+      <Card className="p-6 bg-[#1c1c1c] border-neutral-800 flex flex-col col-span-1">
+        <h3 className="text-sm font-mono text-neutral-300 uppercase mb-4">
+          Ingest Requests
+        </h3>
+
+        <div style={{ width: "100%", height: "100%" }}>
+          <ResponsiveContainer>
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+
+              <XAxis
+                dataKey="x"
+                type="number"
+                tickFormatter={(v) => formatShortTime(data[0].tsMs + v)}
+                stroke="#404040"
+                fontSize={11}
+              />
+
+              <YAxis stroke="#404040" allowDecimals={false} fontSize={11} />
+
+              <Tooltip
+                content={<CustomIngestTooltip base={data[0]?.tsMs || 0} />}
+              />
+
+              <Area
+                type="step"
+                dataKey="ingest"
+                name="Ingest Count"
+                stroke="gray"
+                fill="gray"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      <Card className="p-6 bg-[#1c1c1c] border-neutral-800 flex flex-col col-span-2">
+        <h3 className="text-sm font-mono text-neutral-300 uppercase mb-4">
+          Ask Requests
+        </h3>
+
+        <div style={{ width: "100%", height: 400 }}>
+          <ResponsiveContainer>
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+
+              <XAxis
+                dataKey="x"
+                type="number"
+                tickFormatter={(v) => formatShortTime(data[0].tsMs + v)}
+                stroke="#404040"
+                fontSize={11}
+              />
+
+              <YAxis stroke="#404040" allowDecimals={false} fontSize={11} />
+
+              <Tooltip
+                content={<CustomAskTooltip base={data[0]?.tsMs || 0} />}
+              />
+
+              <Area
+                type="monotone"
+                dataKey="ask"
+                name="Ask Count"
+                stroke="#3b82f6"
+                fill="#3b82f6"
+                fillOpacity={0.2}
+                strokeWidth={2}
+                dot
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    </>
   );
 }
 
@@ -192,6 +272,64 @@ function CustomTooltip({ active, payload, base }: any) {
       <div className="">
         <span className="text-neutral-300">project_delete: </span>
         <span className="text-white">{row.project_deleted}</span>
+      </div>
+    </div>
+  );
+}
+function CustomAskTooltip({ active, payload, base }: any) {
+  if (!active || !payload?.length) return null;
+
+  const row = payload[0].payload;
+  const time = new Date(base + row.x).toLocaleString();
+
+  return (
+    <div className="bg-[#191919] border border-neutral-800 p-3 rounded-md text-xs font-mono min-w-[160px]">
+      <p className="text-neutral-400 mb-2 border-b border-neutral-800 pb-1">
+        {time}
+      </p>
+
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-neutral-300">ask:</span>
+        <span className="text-white font-bold">{row.ask}</span>
+      </div>
+
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-neutral-300">avg latency:</span>
+        <span className="text-white">{row.avgLatency} ms</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-neutral-300">total events:</span>
+        <span className="text-white">{row.latency_count}</span>
+      </div>
+    </div>
+  );
+}
+function CustomIngestTooltip({ active, payload, base }: any) {
+  if (!active || !payload?.length) return null;
+
+  const row = payload[0].payload;
+  const time = new Date(base + row.x).toLocaleString();
+
+  return (
+    <div className="bg-[#191919] border border-neutral-800 p-3 rounded-md text-xs font-mono min-w-[160px]">
+      <p className="text-neutral-400 mb-2 border-b border-neutral-800 pb-1">
+        {time}
+      </p>
+
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-neutral-300">ingest:</span>
+        <span className="text-white font-bold">{row.ingest}</span>
+      </div>
+
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-neutral-300">avg latency:</span>
+        <span className="text-white">{row.avgLatency} ms</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-neutral-300">total events:</span>
+        <span className="text-white">{row.latency_count}</span>
       </div>
     </div>
   );

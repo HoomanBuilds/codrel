@@ -69,6 +69,8 @@ npx codrel ingest \
   --repo <github-url> \
   --dir <folder> \
   --files <file1,file2,...>
+  --sitemap <yml> \
+  --pattern <pattern or sitemap>
 ```
 
 This writes the `.codrel` knowledge state:

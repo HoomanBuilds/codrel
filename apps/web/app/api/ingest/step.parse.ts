@@ -18,7 +18,7 @@ export async function stepParse(req: Request, ctx: IngestContext) {
 
   ctx.projectId = body.metadata?.projectId ?? null;
   ctx.name = body.metadata?.projectName ?? "Untitled";
-
+  ctx.cloud = body.metadata?.cloud;
   ctx.totalTokens = body.metadata?.totalTokens ?? 0;
   ctx.sources = body.metadata?.sources ?? [];
 

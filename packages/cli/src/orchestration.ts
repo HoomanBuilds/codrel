@@ -10,10 +10,13 @@ import { extractChunksFromTrees } from "./core/extractChunksFromTrees";
 import processUrl from "./pipelines/url";
 import processFiles from "./pipelines/file";
 import processFolder from "./pipelines/folder";
+import processSitemap from "./pipelines/sitemap";
 
 export interface ProcessParams {
   repo?: string[];
   url?: string[];
+  sitemap?: string;
+  pattern?: string;
   files?: string[];
   folder?: string[];
   token: string;
@@ -24,8 +27,14 @@ export interface ProcessParams {
 }
 
 export async function orchestrate(params: ProcessParams): Promise<void> {
-  if (!params.repo && !params.url && !params.files && !params.folder) {
-    logger.error("missing source: repo | url | files | folder");
+  if (
+    !params.repo &&
+    !params.url &&
+    !params.files &&
+    !params.folder &&
+    !params.sitemap
+  ) {
+    logger.error("missing source: repo | url | files | folder | sitemap");
     return;
   }
 
@@ -48,10 +57,12 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
   }
 
   const ctx = new Context(id, params.token);
-  await ctx.init();
   if (params.local) ctx.local = true;
+  await ctx.init();
   ctx.name = params.name ?? "Untitled Project";
   ctx.remoteProjectId = params.projectId || null;
+  ctx.sitemap = params.sitemap || null;
+  ctx.pattern = params.pattern || null;
 
   const tasks: Promise<void>[] = [];
   const t0 = Date.now();
@@ -64,6 +75,7 @@ export async function orchestrate(params: ProcessParams): Promise<void> {
     for (const f of params.files) tasks.push(processFiles(f, ctx, params));
   if (params.folder)
     for (const d of params.folder) tasks.push(processFolder(d, ctx, params));
+  if (params.sitemap) tasks.push(processSitemap(params.sitemap, ctx, params));
 
   await Promise.all(tasks);
 

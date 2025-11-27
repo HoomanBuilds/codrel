@@ -5,7 +5,8 @@ interface AnalyticsState {
   data: any | null;
   loading: boolean;
   fetched: boolean;
-  fetchOnce: () => Promise<void>;
+  fetchOnce: (force?: boolean) => Promise<void>;
+  setData: (partial: any) => void;
 }
 
 export const useAnalytics = create<AnalyticsState>((set, get) => ({
@@ -27,16 +28,28 @@ export const useAnalytics = create<AnalyticsState>((set, get) => ({
   loading: false,
   fetched: false,
 
-  fetchOnce: async () => {
-    if (get().fetched) return;
-    set({ loading: true });
+  setData: (partial: any) =>
+    set((state) => ({
+      data: { ...state.data, ...partial },
+    })),
+  fetchOnce: async (force = false) => {
+    const firstFetch = !get().fetched;
+
+    if (firstFetch) set({ loading: true });
 
     try {
       const r = await fetch("/api/analytics");
       const json = await r.json();
-      set({ data: json, loading: false, fetched: true });
+
+      set({
+        data: json,
+        loading: firstFetch ? false : get().loading,
+        fetched: true,
+      });
     } catch {
-      set({ loading: false });
+      if (firstFetch) set({ loading: false });
     }
   },
+
+  
 }));

@@ -18,6 +18,9 @@ export interface ContextState {
   logs?: string[];
   name ?: string;
   local?: boolean;
+
+  sitemap?: string | null;
+  pattern?: string | null;
 }
 
 export class Context {
@@ -41,6 +44,9 @@ export class Context {
   pipelineVersion = 1;
   logs: string[] = [];
 
+  sitemap: string | null = null;
+  pattern: string | null = null;
+
   local = false;
 
   constructor(projectLocalId: string, token?: string) {
@@ -54,7 +60,9 @@ export class Context {
   }
 
   async init(): Promise<void> {
-    await fs.mkdir(this.baseDir, { recursive: true });
+    if(this.local) {
+      await fs.mkdir(this.baseDir, { recursive: true });
+    }
   }
 
   file(name: string): string {
