@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import { orchestrate, ProcessParams } from "./orchestration";
+import { orchestrate, ProcessParams } from "./orchestration.js";
 
 type CreateArgs = {
   repo?: string;

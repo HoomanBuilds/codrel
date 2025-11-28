@@ -117,13 +117,15 @@ async function autoInstallAgent(context: vscode.ExtensionContext) {
   return distFile;
 }
 
-function updateTokenInMcpConfig(token: string) {
+export function updateEnvInMcpConfig(key: string, value: string) {
+  if (!key || !value) return;
+
   const mcpPath = getMcpJsonPath();
   const app = vscode.env.appName.toLowerCase();
   const isKiro = app.includes("kiro");
 
   if (!fs.existsSync(mcpPath)) {
-    log("MCP file missing while saving token.");
+    log("MCP file missing while saving env.");
     return;
   }
 
@@ -131,22 +133,22 @@ function updateTokenInMcpConfig(token: string) {
   try {
     data = JSON.parse(fs.readFileSync(mcpPath, "utf8"));
   } catch {
-    log("Invalid mcp.json while saving token.");
+    log("Invalid mcp.json while saving env.");
     return;
   }
 
   if (isKiro) {
     if (!data.mcpServers || !data.mcpServers["codrelAi"]) return;
     if (!data.mcpServers["codrelAi"].env) data.mcpServers["codrelAi"].env = {};
-    data.mcpServers["codrelAi"].env["CODREL_TOKEN"] = token;
+    data.mcpServers["codrelAi"].env[key] = value;
   } else {
     if (!data.servers || !data.servers["codrelAi"]) return;
     if (!data.servers["codrelAi"].env) data.servers["codrelAi"].env = {};
-    data.servers["codrelAi"].env["CODREL_TOKEN"] = token;
+    data.servers["codrelAi"].env[key] = value;
   }
 
   fs.writeFileSync(mcpPath, JSON.stringify(data, null, 2));
-  log("Token injected into MCP env.");
+  log(`Env updated: ${key}=${value}`);
 }
 
 function appendKiroSteering(
@@ -221,7 +223,6 @@ export {
   log,
   registerMcp,
   autoInstallAgent,
-  updateTokenInMcpConfig,
   appendKiroSteering,
   appendCopilotSteering,
   getWorkspaceRoot,

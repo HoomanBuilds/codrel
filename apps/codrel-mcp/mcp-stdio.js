@@ -7199,7 +7199,8 @@ var import_dotenv = __toESM(require_main(), 1);
 import_dotenv.default.config({ quiet: true });
 var envConfig = {
   codrel: {
-    token: process.env.CODREL_TOKEN
+    token: process.env.CODREL_TOKEN,
+    top_k: process.env.CODREL_TOP_K ? Number(process.env.CODREL_TOP_K) : 5
   }
 };
 
@@ -20182,7 +20183,7 @@ var RagService = class {
     const body = {
       token: this.apiToken,
       query,
-      k: 20,
+      k: 15,
       projectId,
       cloud: this.cloud
     };
@@ -20237,9 +20238,9 @@ var RagService = class {
     });
     return scored;
   }
-  createContextPrompt(filteredChunks) {
+  createContextPrompt(filteredChunks, pick2 = 5) {
     const out = [];
-    for (const c of filteredChunks.slice(0, 5)) {
+    for (const c of filteredChunks.slice(0, pick2)) {
       if (this.cloud) {
         out.push(
           `// ${c.relativePath} (${c.startLine ?? "?"}-${c.endLine ?? "?"})
@@ -20259,7 +20260,7 @@ var RagService = class {
 };
 
 // src/tools/tools.ts
-var getCodrelTools = (token) => {
+var getCodrelTools = (token, options) => {
   return {
     getContext: {
       tool: {
@@ -20281,7 +20282,7 @@ var getCodrelTools = (token) => {
         try {
           const results = await rag.fetchRetrievals(collectionId, RaqQuery);
           const filtered = await rag.filterRetrieval(results, RaqQuery);
-          const prompt = rag.createContextPrompt(filtered);
+          const prompt = rag.createContextPrompt(filtered, options.topK);
           return {
             content: [{ type: "text", text: prompt }]
           };
@@ -20298,12 +20299,12 @@ var getCodrelTools = (token) => {
 };
 
 // src/server/server.ts
-function createStdioMcpServer(token) {
+function createStdioMcpServer(token, options) {
   const server = new McpServer({
     name: "@codrel-mcp",
     version: "1.0.0"
   });
-  let allTools = { ...getCodrelTools(token) };
+  let allTools = { ...getCodrelTools(token, { topK: options.topK }) };
   console.error("\u{1F6E0}\uFE0F Registering Codrel MCP tools...", token);
   console.error("\u{1F50D} Tools available before registration:", Object.keys(allTools));
   for (const [name, data] of Object.entries(allTools)) {
@@ -20329,8 +20330,9 @@ async function createStdioMcpTransport(server) {
 // src/server/mcp-stdio.ts
 var stdioMcpHandler = async () => {
   const token = getToken();
+  const topK = envConfig.codrel.top_k || 5;
   if (!token) return;
-  const server = createStdioMcpServer(token);
+  const server = createStdioMcpServer(token, { topK });
   await createStdioMcpTransport(server);
   console.error("codrelAi stdio mcp server running");
 };

@@ -2,7 +2,7 @@ import z from "zod";
 import { RagService } from "./RAG.js";
 
 
-export const getCodrelTools = (token: string) => {
+export const getCodrelTools = (token: string , options: { pick: number }) => {
   return {
     getContext: {
       tool: {
@@ -27,7 +27,7 @@ export const getCodrelTools = (token: string) => {
           const results = await rag.fetchRetrievals(collectionId, RaqQuery);
           const filtered = await rag.filterRetrieval(results, RaqQuery);
 
-          const prompt = rag.createContextPrompt(filtered as any);
+          const prompt = rag.createContextPrompt(filtered as any , options.pick);
 
           return {
             content: [{ type: "text", text: prompt }],

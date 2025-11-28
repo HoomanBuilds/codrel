@@ -1,6 +1,14 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { registerMcp, autoInstallAgent, log, updateTokenInMcpConfig, getWorkspaceRoot, appendKiroSteering, appendCopilotSteering } from "./utils";
+import {
+  registerMcp,
+  autoInstallAgent,
+  log,
+  getWorkspaceRoot,
+  appendKiroSteering,
+  appendCopilotSteering,
+  updateEnvInMcpConfig,
+} from "./utils";
 import path from "path";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -19,18 +27,21 @@ export async function activate(context: vscode.ExtensionContext) {
     "Codrel Agent installed & MCP registered."
   );
 
-  const setToken = vscode.commands.registerCommand("codrel.setToken", async () => {
-    const token = await vscode.window.showInputBox({
-      prompt: "Enter Codrel API token",
-      password: true
-    });
-    if (!token) return;
+  const setToken = vscode.commands.registerCommand(
+    "codrel.setToken",
+    async () => {
+      const token = await vscode.window.showInputBox({
+        prompt: "Enter Codrel API token",
+        password: true,
+      });
+      if (!token) return;
 
-    updateTokenInMcpConfig(token);
+      updateEnvInMcpConfig("CODREL_TOKEN", token);
 
-    vscode.window.showInformationMessage("Codrel token saved to MCP config.");
-    log("Token saved to MCP env.");
-  });
+      vscode.window.showInformationMessage("Codrel token saved to MCP config.");
+      log("Token saved to MCP env.");
+    }
+  );
 
   const addContext = vscode.commands.registerCommand(
     "codrel.addContext",
@@ -38,10 +49,14 @@ export async function activate(context: vscode.ExtensionContext) {
       const name = await vscode.window.showInputBox({ prompt: "Tool name" });
       if (!name) return;
 
-      const description = await vscode.window.showInputBox({ prompt: "Description" });
+      const description = await vscode.window.showInputBox({
+        prompt: "Description",
+      });
       if (!description) return;
 
-      const collectionId = await vscode.window.showInputBox({ prompt: "Collection ID" });
+      const collectionId = await vscode.window.showInputBox({
+        prompt: "Collection ID",
+      });
       if (!collectionId) return;
 
       const root = getWorkspaceRoot();
@@ -53,7 +68,12 @@ export async function activate(context: vscode.ExtensionContext) {
       const isKiro = vscode.env.appName.toLowerCase().includes("kiro");
 
       if (isKiro) {
-        const steeringPath = path.join(root, ".kiro", "steering", "kiro.instructions.md");
+        const steeringPath = path.join(
+          root,
+          ".kiro",
+          "steering",
+          "kiro.instructions.md"
+        );
         appendKiroSteering(steeringPath, name, description, collectionId);
 
         vscode.window.showInformationMessage(
@@ -70,6 +90,34 @@ export async function activate(context: vscode.ExtensionContext) {
       log(`Added Copilot steering entry for ${name}`);
     }
   );
+
+  const setPICK = vscode.commands.registerCommand(
+    "codrel.setPICK",
+    async () => {
+      const val = await vscode.window.showInputBox({
+        prompt: "Pick (1–15). how many retrievals used to build context prompt",
+        value: "",
+      });
+      if (val === undefined) return;
+
+      if (val.trim() === "") {
+        await context.globalState.update("codrel.pick", undefined);
+        vscode.window.showInformationMessage("Codrel Pick override cleared.");
+        return;
+      }
+
+      const k = Number(val);
+      if (!Number.isInteger(k) || k < 1 || k > 15) {
+        vscode.window.showWarningMessage("Invalid Pick. Ignored.");
+        return;
+      }
+
+      updateEnvInMcpConfig("CODREL_PICK", k.toString());
+      vscode.window.showInformationMessage(`Codrel Pick set to ${k}`);
+    }
+  );
+
+  context.subscriptions.push(setPICK);
   context.subscriptions.push(addContext);
   context.subscriptions.push(setToken);
 }

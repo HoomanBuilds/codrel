@@ -1,7 +1,7 @@
 import { AppError } from "./AppError";
 import { CodrelChunk, IngestContext } from "./orchestrator";
 
-const MAX_TOTAL_CHARS = 250_000;
+const MAX_TOTAL_CHARS = 450_000;
 
 export async function stepParse(req: Request, ctx: IngestContext) {
   let body;

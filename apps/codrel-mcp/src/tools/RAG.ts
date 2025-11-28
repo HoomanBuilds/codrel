@@ -78,7 +78,7 @@ export class RagService {
     const body: RagRequest = {
       token: this.apiToken,
       query,
-      k: 20,
+      k: 15,
       projectId,
       cloud: this.cloud,
     };
@@ -142,10 +142,10 @@ export class RagService {
     return scored;
   }
 
-  createContextPrompt(filteredChunks: any[]): string {
+  createContextPrompt(filteredChunks: any[] , pick : number = 5): string {
     const out = [];
 
-    for (const c of filteredChunks.slice(0, 5)) {
+    for (const c of filteredChunks.slice(0, pick)) {
       if (this.cloud) {
         out.push(
           `// ${c.relativePath} (${c.startLine ?? "?"}-${c.endLine ?? "?"})\n` +

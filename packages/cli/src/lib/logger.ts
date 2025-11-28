@@ -1,4 +1,4 @@
-import Context from "../core/context";
+import Context from "../core/context.js";
 
 type LogValue = string | number | boolean | object | null | undefined;
 type LogArgs = LogValue[];

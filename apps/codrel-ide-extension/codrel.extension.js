@@ -203,7 +203,6 @@ function getWorkspaceRoot() {
   return ws?.[0]?.uri.fsPath || null;
 }
 
-// src/extension.ts
 var import_path = __toESM(require("path"));
 async function activate(context) {
   log("Codrel extension activated.");

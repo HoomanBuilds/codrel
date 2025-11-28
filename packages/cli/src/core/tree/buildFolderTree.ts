@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { BINARY_EXT, IGNORE_LIST } from "../ignore";
+import { BINARY_EXT, IGNORE_LIST } from "../ignore.js";
 
 function loadLocalIgnore(dir: string): Set<string> {
   const p = path.join(dir, ".gitignore");

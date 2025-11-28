@@ -22,6 +22,7 @@ import { formatDate, formatNumber } from "./utils";
 import AnalyticsDashboardSkeleton from "../../../components/SkeletonAnalytics";
 import { useAnalytics } from "../../../store/analytics.store";
 import AskLatencyGraph from "../../../components/AnalyticsGraph";
+import { createPortal } from "react-dom";
 
 const DataCard = ({ label, value, subValue, icon: Icon }: any) => (
   <Card className="p-5 flex flex-col justify-between h-[120px] bg-[#1c1c1c] border-neutral-800 hover:border-neutral-700 transition-colors group">
@@ -260,6 +261,7 @@ export default function AnalyticsDashboard() {
 
             <tbody className="text-xs font-mono text-neutral-300 divide-y divide-neutral-800/50">
               {events?.slice(0, showEvent).map((evt: any, i: number) => (
+                
                 <tr key={i} className="hover:bg-white/2 transition-colors">
                   <td className="p-3 pl-4 text-neutral-500 whitespace-nowrap">
                     {formatDate(evt.ts)}
@@ -268,7 +270,9 @@ export default function AnalyticsDashboard() {
                     <span
                       className={cn(
                         "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase",
-                        evt.event === "ask" && "bg-blue-900/20 text-blue-400",
+                        evt.event === "ask" && evt.success
+                          ? "bg-blue-900/20 text-blue-400"
+                          : "bg-red-900/20 text-red-400",
                         evt.event === "ingest" &&
                           "bg-purple-900/20 text-purple-400",
                         evt.event === "project_create" &&
@@ -305,12 +309,10 @@ export default function AnalyticsDashboard() {
                   <td className="p-3 text-neutral-400">
                     {evt.metadata?.latency_ms ?? "-"} ms
                   </td>
-                  <td
-                    className="p-3 max-w-[250px] truncate text-neutral-500"
-                    title={JSON.stringify(evt.metadata, null, 2)}
-                  >
-                    {JSON.stringify(evt.metadata)}
+                  <td className="p-3">
+                    <MetaHover meta={evt.metadata} />
                   </td>
+
                   <td className="p-3">
                     {evt.success ? (
                       <div className="flex items-center gap-1.5 text-green-500">
@@ -342,3 +344,76 @@ export default function AnalyticsDashboard() {
     </div>
   );
 }
+
+type MetaHoverProps = {
+  meta: Record<string, unknown>;
+};
+
+type Pos = { x: number; y: number } | null;
+
+const MetaHover: React.FC<MetaHoverProps> = ({ meta }) => {
+  const [pos, setPos] = React.useState<Pos>(null);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  const entries = Object.entries(meta || {});
+
+  const show = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({
+        x: rect.left,
+        y: rect.bottom + 6,
+      });
+    }
+  };
+
+  const hide = () => setPos(null);
+
+  return (
+    <>
+      <div
+        ref={ref}
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        className="max-w-[250px] truncate text-neutral-500 cursor-help"
+      >
+        {JSON.stringify(meta)}
+      </div>
+
+      {pos &&
+        createPortal(
+          <div
+            className="
+              fixed z-50 
+              bg-[#111] border border-neutral-800 rounded-lg 
+              p-3 shadow-xl 
+              max-w-[320px] w-max
+              animate-in fade-in duration-100
+            "
+            style={{ left: pos.x, top: pos.y }}
+          >
+            <div className="text-[10px] font-mono text-neutral-400 mb-2 uppercase">
+              metadata
+            </div>
+
+            <div className="space-y-1">
+              {entries.map(([k, v], i) => (
+                <div
+                  key={i}
+                  className="flex justify-between gap-3 text-[11px] font-mono"
+                >
+                  <span className="text-neutral-500">{k}</span>
+                  <span className="text-neutral-300 max-w-[180px] truncate text-right">
+                    {String(v).length > 50
+                      ? String(v).slice(0, 50) + "…"
+                      : String(v)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
+  );
+};

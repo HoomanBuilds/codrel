@@ -1,17 +1,16 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { Context } from "./core/context";
-import { logger } from "./lib/logger";
-import processRepo from "./pipelines/repo";
-import { vectorIndexer } from "./core/indexer/vectorIndexer";
-import { mergeAllTrees } from "./core/merge";
-import { extractChunksFromTrees } from "./core/extractChunksFromTrees";
-import processUrl from "./pipelines/url";
-import processFiles from "./pipelines/file";
-import processFolder from "./pipelines/folder";
-import processSitemap from "./pipelines/sitemap";
-
+import { Context } from "./core/context.js";
+import { logger } from "./lib/logger.js";
+import processRepo from "./pipelines/repo.js";
+import { vectorIndexer } from "./core/indexer/vectorIndexer.js";
+import { mergeAllTrees } from "./core/merge.js";
+import { extractChunksFromTrees } from "./core/extractChunksFromTrees.js";
+import processUrl from "./pipelines/url.js";
+import processFiles from "./pipelines/file.js";
+import processFolder from "./pipelines/folder.js";
+import processSitemap from "./pipelines/sitemap.js";
 export interface ProcessParams {
   repo?: string[];
   url?: string[];

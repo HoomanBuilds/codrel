@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "codrel": "dist/index.js"
+    "codrel": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "start": "tsx src/index.ts"
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@langchain/textsplitters": "^1.0.0",
@@ -22,8 +21,6 @@
   "devDependencies": {
     "@types/jsdom": "^27.0.0",
     "@types/node": "^20.0.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.4.0",
-    "unfluff": "^3.2.0"
+    "typescript": "^5.4.0"
   }
 }

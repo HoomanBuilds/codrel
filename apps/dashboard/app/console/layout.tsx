@@ -54,13 +54,13 @@ export default function ConsoleLayout({
       <aside className="w-56 h-screen overflow-auto border-r border-neutral-800 flex flex-col">
         <div className="p-5 flex items-center gap-3">
           <div className="h-8 w-8 bg-white text-black rounded-md flex items-center justify-center">
-            <LayoutTemplate className="h-5 w-5" />
+            <img src="/logo.png" className="grayscale" alt="CodrelAi Logo" />
           </div>
           <h1 className="text-white font-bold text-lg">CodrelAi</h1>
         </div>
 
         <nav className="px-4 flex-1 space-y-1 mt-3">
-          <NavItem href="/console/form" label="Create" icon={PlusCircle} />
+          {/* <NavItem href="/console/form" label="Create" icon={PlusCircle} /> */}
           <NavItem
             href="/console/analytics"
             label="Analytics"

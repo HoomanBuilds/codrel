@@ -24,12 +24,12 @@ export async function POST(req: Request) {
   const start = performance.now();
 
   try {
-    const { query, k = 20, filter, projectId, cloud } = await req.json();
+    const { query, k = 15, filter, projectId, cloud } = await req.json();
     ctx.projectId = projectId;
     ctx.cloud = cloud;
 
-    if (k <= 0 || k > 100)
-      throw new ApiError(400, "k must be between 1 and 100");
+    if (k <= 5 || k > 100)
+      throw new ApiError(400, "k must be between 5 and 100");
     if (!ctx.projectId) throw new ApiError(400, "Missing projectId");
     if (!query) throw new AppError("Missing query", 400);
 
@@ -74,22 +74,24 @@ export async function POST(req: Request) {
         vector_min_score: min,
         vector_max_score: max,
         client: ctx.client,
-        owner : project.email,
+        owner: project.email,
         type: project.type,
-        user : ctx.userEmail,
+        user: ctx.userEmail,
       },
     });
-
-
     return NextResponse.json({
       success: true,
       retrievals: raw.length,
-      results: raw.map(([doc, score]) => ({
-        vectorScore: score,
-        id: doc.id,
-        metadata: doc.metadata,
-        pageContent: doc.pageContent,
-      })),
+      results: raw.map(([doc, score]) => {
+        const dist = Number(score);
+        const sim = 1 - Math.min(dist, 2) / 2;
+        return {
+          vectorScore: sim,
+          id: doc.id,
+          metadata: doc.metadata,
+          pageContent: doc.pageContent,
+        };
+      }),
     });
   } catch (err) {
     const latency = Math.round(performance.now() - start);
@@ -103,7 +105,7 @@ export async function POST(req: Request) {
       metadata: {
         latency_ms: latency,
         client: ctx.client,
-        user : ctx.userEmail
+        user: ctx.userEmail,
       },
     });
 

@@ -1,8 +1,8 @@
-import { logger } from "@/src/lib/logger.js";
+import { logger } from "../../lib/logger.js";
 import { apiClient } from "../../lib/apiClient.js";
 import { ContextState } from "../context.js";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export const vectorIndexer = {
   async indexTree(chunks: any, ctx: ContextState) {

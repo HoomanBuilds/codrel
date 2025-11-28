@@ -67,7 +67,7 @@ export default function SettingsClient({ session }: any) {
     setNewKeyName("");
     useAnalytics.setState((state) => ({
       data: {
-        ...state.data,  
+        ...state.data,
         tokens: state.data.tokens + 1,
         stats: {
           ...state.data.stats,
@@ -86,7 +86,7 @@ export default function SettingsClient({ session }: any) {
     const updated = tokens.filter((t) => t.token !== token);
     useAnalytics.setState((state) => ({
       data: {
-        ...state.data,  
+        ...state.data,
         tokens: state.data.tokens - 1,
         stats: {
           ...state.data.stats,
@@ -102,7 +102,6 @@ export default function SettingsClient({ session }: any) {
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 1200);
   }
-
   return (
     <div
       style={{
@@ -204,18 +203,12 @@ export default function SettingsClient({ session }: any) {
                     )}
                   </Button>
                 </div>
-
-                <p className="text-[10px] text-yellow-500 flex items-center gap-1">
-                  <ShieldAlert className="h-3 w-3" />
-                  Copy this now — you won't see it again.
-                </p>
               </div>
             )}
           </div>
         </div>
       </Card>
 
-      {/* ACTIVE TOKENS */}
       <div className="space-y-3">
         <h3 className="text-sm text-neutral-400 px-1">Active Keys</h3>
 
@@ -227,30 +220,41 @@ export default function SettingsClient({ session }: any) {
           tokens.map((t, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-4 bg-[#1a1a1a] border border-neutral-800 rounded-lg"
+              className="flex items-center justify-between p-4 bg-[#161616] border border-neutral-800 rounded-xl hover:border-neutral-700 transition"
             >
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-neutral-800 flex items-center justify-center">
-                  <Key className="h-5 w-5 text-neutral-500" />
+                <div className="h-10 w-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                  <Key className="h-5 w-5 text-neutral-400" />
                 </div>
 
-                <div>
-                  <span className="text-white text-sm">
+                <div className="space-y-0.5">
+                  <span className="text-white text-sm font-medium">
                     {t.meta?.name || "Untitled"}
                   </span>
-                  <div className="text-xs text-neutral-500">
-                    Created: {new Date(t.createdAt).toLocaleString()}
+
+                  <div className="text-[10px] text-neutral-600">
+                    {new Date(t.createdAt).toLocaleString()}
                   </div>
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
-                className="text-red-400"
-                onClick={() => revoke(t.token)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" /> Revoke
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigator.clipboard.writeText(t.token)}
+                  className="text-neutral-300 hover:text-white"
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="text-red-400 hover:text-red-300"
+                  onClick={() => revoke(t.token)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                </Button>
+              </div>
             </div>
           ))
         )}

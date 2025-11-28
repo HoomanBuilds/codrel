@@ -27,13 +27,17 @@
       {
         "command": "codrel.setToken",
         "title": "Codrel: Set API Token"
+      },
+      {
+        "command": "codrel.setTopK",
+        "title": "Codrel: Set Top K"
       }
     ]
   },
   "scripts": {
     "build": "esbuild src/extension.ts --bundle --platform=node --external:vscode --outfile=dist/extension.js",
     "watch": "esbuild src/extension.ts --bundle --platform=node --external:vscode --outfile=dist/extension.js --watch",
-    "package": "vsce package"
+    "package": "pnpm run build && vsce package"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
