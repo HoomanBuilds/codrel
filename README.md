@@ -38,10 +38,6 @@ apps/
 
 packages/
   cli/                    → Codrel CLI (RAG ingestion engine)
-  shared/                 → Shared logic + types
-  ui/                     → Shared UI components
-  eslint-config/          → Shared lint config
-  typescript-config/      → Shared tsconfig
 ```
 
 ---
@@ -128,13 +124,6 @@ Brings Codrel into VS Code and Kiro IDE:
 * exposes commands for adding collections/tools
 
 <!-- ![IDE Extension](./assets/extension.png) -->
-
-### **5. Shared Packages**
-
-* `shared/` → common logic/types/state
-* `ui/` → dashboard UI components
-* `eslint-config/` + `typescript-config/` → monorepo dev standards
-
 ---
 
 ## **🔗 How It All Works Together**
@@ -144,7 +133,7 @@ Codrel allows every part of your workflow to access the same structured context:
 | Layer         | Purpose                                      |
 | ------------- | -------------------------------------------- |
 | **CLI**       | Ingest data → build `.codrel`                |
-| **Web**       | View/manage context + expose backend API     |
+| **Dashboard**       | View/manage context + expose backend API     |
 | **MCP**       | Translate editor requests → Codrel responses |
 | **Extension** | Provide workspace tools + MCP integration    |
 
