@@ -11,12 +11,12 @@ import type {
 } from "../types.js";
 
 import { ProcessRetrieved } from "../filter-engine/preprocess.js";
-import { DEFAULT_WEIGHTS } from "../utils/constants.js";
+import { BALANCED_WEIGHTS } from "../utils/constants.js";
 
 const ROOT = path.join(os.homedir(), ".codrel");
 
 export class RagService {
-  private endpoint = "http://localhost:3000/api/ask";
+  private endpoint = "https://codrel-dashboard.vercel.app/api/ask";
   private apiToken: null | string = null;
 
   collectionId: string;
@@ -136,7 +136,7 @@ export class RagService {
       query,
       topK: 20,
       tokenMax: null,
-      weights: DEFAULT_WEIGHTS,
+      weights: BALANCED_WEIGHTS,
     });
 
     return scored;

@@ -14,7 +14,7 @@ export const apiClient = {
   ): Promise<T> {
     const { token, ...rest } = body;
 
-    const res = await fetch(`http://localhost:3000/api${path}`, {
+    const res = await fetch(`https://codrel-dashboard.vercel.app/api${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

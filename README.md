@@ -3,16 +3,15 @@
 ![Codrel Banner](./assets/banner.png)
 
 Codrel is a full-stack system for generating, structuring, and serving **RAG-ready context** to every tool a developer uses.
-It ingest documents, URLs, repos, and directories through a CLI, produces structured context, and exposes it to IDEs and agents through MCP, APIs, and a web dashboard.
+It ingests documents, URLs, repos, and directories through a CLI, produces structured context, and exposes it to IDEs and agents through MCP, APIs, and a web dashboard.
 
 A single pipeline:
-**Your data → Codrel ingestion → structured context → usable everywhere.**
+**Your data → Codrel ingestion → structured context → usable everywhere (including Kiro IDE).**
 
 ---
 
 ## **✨ Overview**
 
-![Codrel Dashboard](./assets/dashboard.png)
 
 Codrel solves the core problem:
 AI assistants don’t know your project — Codrel gives them context.
@@ -22,9 +21,10 @@ AI assistants don’t know your project — Codrel gives them context.
 * explore/manage → Web (Next.js)
 * serve structured context → API
 * plug into editors → MCP server
-* access instantly → VS Code/Kiro extension
+* **access instantly in Kiro IDE via Codrel extension**
+* access in VS Code as well
 
-Codrel makes every coding environment context-aware.
+Codrel makes every coding environment — **especially Kiro** — context-aware.
 
 ---
 
@@ -32,7 +32,7 @@ Codrel makes every coding environment context-aware.
 
 ```
 apps/
-  codrel-ide-extension/   → VS Code + Kiro extension
+  codrel-ide-extension/   → Kiro IDE + VS Code extension
   codrel-mcp/             → MCP Server (stdio)
   web/                    → Next.js dashboard + API routes
 
@@ -44,7 +44,7 @@ packages/
 
 ## **🧠 What Codrel Does**
 
-Codrel takes scattered knowledge from your project and turns it into structured context usable by AI agents.
+Codrel takes scattered knowledge from your project and turns it into structured context usable by AI agents — including those running inside **Amazon Kiro’s agentic workflows**.
 
 ### The CLI ingests:
 
@@ -60,68 +60,88 @@ Codrel takes scattered knowledge from your project and turns it into structured 
 ```
 npx codrel ingest \
   --token=<token> \
-  --documentToIngest <path|url> \
-  --support \
   --repo <github-url> \
   --dir <folder> \
-  --files <file1,file2,...>
+  --files <file1,file2,...> \
   --sitemap <yml> \
   --pattern <pattern or sitemap>
 ```
 
+**Quick Answer — Example demo command**
+
+```bash
+codrel ingest \
+  --token=Fssdsioadsngoadn124bsdsg \
+  --repo=https://github.com/vercel/next.js \
+  --dir=apps/dashboard \
+  --files=package.json,README.md \
+  --sitemap=https://docs.nosana.io/sitemap.yml \
+  --pattern="docs/**"
+```
+
+**Done.**
+
+
 This writes the `.codrel` knowledge state:
 
 ```
-.cordel/
+.codrel/projects/projectID (for --local)
   chunks.json
   meta.json
   state.json
-  wholecontext.json
 ```
 
-This becomes the **source of truth** for all other components.
+
+This becomes the core context layer for Kiro, VS Code, MCP agents, and the web dashboard.
 
 ---
 
 ## **🖥 Architecture**
 
 ![Codrel Architecture](./assets/flow.png)
+
 ---
 
 ## **🧩 Component Breakdown**
 
 ### **1. Codrel CLI (packages/cli)**
 
-The heart of Codrel.
-Builds the entire RAG context using ingestion pipelines, orchestration logic, and the internal `.codrel` engine.
+Ingestion pipeline + RAG structuring engine → outputs the `.codrel` knowledge base.
 
-### **2. Codrel Web (apps/web)**
+### **2. Codrel Dashboard (apps/web)**
 
-Next.js dashboard + backend:
+Next.js dashboard + API backend:
 
-* visualize context
-* manage collections & auth
-* serve ingestion results to MCP
-* dashboard for end-users
+* visualize structured context
+* manage collections
+* serve context to MCP + Kiro
+* end-user dashboard
+
+![Codrel Dashboard](./assets/dashboard.png)
 
 ![Dashboard GIF Placeholder](./assets/dashboard2.gif)
 
 ### **3. Codrel MCP Server (apps/codrel-mcp)**
 
-Standard MCP implementation over stdio.
-Acts as the interpreter layer between editors and the Codrel Web API.
+Standard MCP over stdio.
+Acts as the bridge between Codrel Web API and AI agents running inside IDEs like **Kiro**.
 
 ### **4. Codrel IDE Extension (apps/codrel-ide-extension)**
 
-Brings Codrel into VS Code and Kiro IDE:
+Brings Codrel directly into **Kiro IDE** and VS Code:
 
-* handles MCP server lifecycle
-* stores Codrel token
-* writes workspace context
+* manages MCP server lifecycle
 
-  * Kiro → `.kiro/steering/codrel-tools.md`
+* stores Codrel auth token
+
+* writes workspace instructions:
+
+  * **Kiro → `.kiro/steering/codrel-tools.md`**
   * VS Code → `.github/copilot-instructions.md`
-* exposes commands for adding collections/tools
+
+* exposes commands for adding Codrel collections + tools
+
+* integrates Codrel context into Kiro’s agentic coding loop
 
 ![IDE Extension](./assets/extension.png)
 
@@ -129,27 +149,26 @@ Brings Codrel into VS Code and Kiro IDE:
 
 * `shared/` → common logic/types/state
 * `ui/` → dashboard UI components
-* `eslint-config/` + `typescript-config/` → monorepo dev standards
-
+* monorepo configs for TS + ESLint
 
 ---
 
 ## **🔗 How It All Works Together**
 
-Codrel allows every part of your workflow to access the same structured context:
+Codrel feeds every layer of your workflow with consistent structured context:
 
-| Layer         | Purpose                                      |
-| ------------- | -------------------------------------------- |
-| **CLI**       | Ingest data                |
-| **Web**       | View/manage context + expose backend API     |
-| **MCP**       | exposes tools to Gather context  |
-| **Extension** | Provide workspace tools + MCP integration    |
+| Layer         | Purpose                                           |
+| ------------- | ------------------------------------------------- |
+| **CLI**       | Ingest & structure data                           |
+| **Web**       | View/manage context + API                         |
+| **MCP**       | Tooling bridge to editors                         |
+| **Extension** | Provide workspace tools + Kiro/VSCode integration |
+
+The result: **your Kiro IDE agents finally understand your project from the first prompt.**
 
 ---
 
 ## **🎯 In One Line**
 
-Codrel turns your real project knowledge into structured, always-available context —
-and feeds it into any AI-powered development workflow.
-
----
+Codrel turns your project’s real knowledge into structured, always-available context —
+and delivers it directly into **Kiro IDE** and every AI-powered development workflow.

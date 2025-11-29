@@ -2,11 +2,8 @@
 
 import React from "react";
 import {
-  LayoutTemplate,
-  PlusCircle,
   BarChart3,
   LogOut,
-  HelpCircle,
   Settings,
   Box,
 } from "lucide-react";
