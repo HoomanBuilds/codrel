@@ -127,7 +127,7 @@ Brings Codrel into VS Code and Kiro IDE:
   * VS Code → `.github/copilot-instructions.md`
 * exposes commands for adding collections/tools
 
-<!-- ![IDE Extension](./assets/extension.png) -->
+![IDE Extension](./assets/extension.png)
 
 ### **5. Shared Packages**
 
@@ -143,9 +143,9 @@ Codrel allows every part of your workflow to access the same structured context:
 
 | Layer         | Purpose                                      |
 | ------------- | -------------------------------------------- |
-| **CLI**       | Ingest data → build `.codrel`                |
+| **CLI**       | Ingest data                |
 | **Web**       | View/manage context + expose backend API     |
-| **MCP**       | Translate editor requests → Codrel responses |
+| **MCP**       | exposes tools to Gather context  |
 | **Extension** | Provide workspace tools + MCP integration    |
 
 ---

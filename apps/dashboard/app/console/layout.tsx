@@ -53,8 +53,8 @@ export default function ConsoleLayout({
     <div className=" overflow-auto text-neutral-200 flex">
       <aside className="w-56 h-screen overflow-auto border-r border-neutral-800 flex flex-col">
         <div className="p-5 flex items-center gap-3">
-          <div className="h-8 w-8 bg-white text-black rounded-md flex items-center justify-center">
-            <img src="/logo.png" className="grayscale" alt="CodrelAi Logo" />
+          <div className="h-8 w-8 text-black rounded-md flex items-center justify-center">
+            <img src="/logocodrel.png"  alt="CodrelAi Logo" />
           </div>
           <h1 className="text-white font-bold text-lg">CodrelAi</h1>
         </div>

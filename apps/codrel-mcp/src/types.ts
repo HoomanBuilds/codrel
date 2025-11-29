@@ -39,6 +39,7 @@ export interface RagApiResponse {
 
 
 export interface RetrievedChunk {
+  pageContent: string | undefined;
   id: string;
   score: number;
 

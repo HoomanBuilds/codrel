@@ -91,31 +91,25 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const setPICK = vscode.commands.registerCommand(
-    "codrel.setPICK",
-    async () => {
-      const val = await vscode.window.showInputBox({
-        prompt: "Pick (1–15). how many retrievals used to build context prompt",
-        value: "",
-      });
-      if (val === undefined) return;
+  const setPICK = vscode.commands.registerCommand("codrel.setPICK", async () => {
+    const val = await vscode.window.showInputBox({
+      prompt: "Pick (1–15).",
+    });
+    if (val === undefined) return;
 
+    setTimeout(() => {
       if (val.trim() === "") {
-        await context.globalState.update("codrel.pick", undefined);
-        vscode.window.showInformationMessage("Codrel Pick override cleared.");
+        context.globalState.update("codrel.pick", undefined);
         return;
       }
 
       const k = Number(val);
-      if (!Number.isInteger(k) || k < 1 || k > 15) {
-        vscode.window.showWarningMessage("Invalid Pick. Ignored.");
-        return;
+      if (Number.isInteger(k) && k >= 1 && k <= 15) {
+        updateEnvInMcpConfig("CODREL_PICK", k.toString());
       }
+    }, 0);
+  });
 
-      updateEnvInMcpConfig("CODREL_PICK", k.toString());
-      vscode.window.showInformationMessage(`Codrel Pick set to ${k}`);
-    }
-  );
 
   context.subscriptions.push(setPICK);
   context.subscriptions.push(addContext);
