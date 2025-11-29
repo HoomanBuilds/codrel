@@ -38,10 +38,6 @@ apps/
 
 packages/
   cli/                    → Codrel CLI (RAG ingestion engine)
-  shared/                 → Shared logic + types
-  ui/                     → Shared UI components
-  eslint-config/          → Shared lint config
-  typescript-config/      → Shared tsconfig
 ```
 
 ---
@@ -134,6 +130,7 @@ Brings Codrel into VS Code and Kiro IDE:
 * `shared/` → common logic/types/state
 * `ui/` → dashboard UI components
 * `eslint-config/` + `typescript-config/` → monorepo dev standards
+
 
 ---
 
