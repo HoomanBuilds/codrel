@@ -2,7 +2,7 @@
 
 ![Codrel Banner](./assets/banner.png)
 
-AI coding agents are powerful, but they fail at one fundamental requirement:
+## AI coding agents are powerful, but they fail at one fundamental requirement:
 
 ## **They do not understand your tech stack.**
 
